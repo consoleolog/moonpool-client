@@ -1,13 +1,66 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-decoration: none;
+    position: relative;
 }
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+main {
+    overflow-x: hidden;
+    z-index: 5;
+    height: 100%;
+    width: 100%;
+    transition: all 0.5s;
+    position: relative;
+    background-color: #fff;
+    border-right: 2px solid rgb(235,235,235) ;
+}
+a {
+    color: #424242;
+}
+.nanum-gothic-regular {
+    font-family: "Nanum Gothic", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+.font-lg {
+    font-size: 16px;
+}
+.font-xl {
+    font-size: 20px;
+}
+.font-s {
+    font-size: 14px;
+}
+.mt-10 {
+    margin-top: 10px;
+}
+.mt-20 {
+    margin-top: 20px;
+}
+.mt-30 {
+    margin-top: 30px;
+}
+.nav-open {
+    right: 200px;
+}
+.nav-close {
+    right: 0;
+}
+.opacity-1 {
+    opacity: 1;
+    visibility: visible;
+    transition: all 0.8s;
+}
+.opacity-0 {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.8s;
+}
+.header-selected {
+    border-bottom: solid 2px rgb(69, 136, 245);
+}
+.header-selected > p {
+    color: rgb(69,136,245);
 }

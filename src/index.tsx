@@ -4,14 +4,21 @@ import './index.css';
 import App from './App';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import reportWebVitals from './reportWebVitals';
-
+import {Provider} from "react-redux";
+import store from "./store/store";
+import {QueryClient, QueryClientProvider} from "react-query";
+const queryClient = new QueryClient()
+export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </QueryClientProvider>,
 );
 
 // If you want your app to work offline and load faster, you can change
