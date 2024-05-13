@@ -119,41 +119,28 @@ function WriteComponent() {
                     <WriteBasicInput name={"description"} onChange={handleChange} required={true}/>
                     <br/><br/><br/>
                     <p>문제 이미지</p><br/>
-                    {/*<WriteBasicImgDiv draggable="true">*/}
-                    {/*    <CiImageOn style={{fontSize: "57px", marginTop: "10px"}}/>*/}
-                    {/*    <h4>문제 이미지 업로드</h4>*/}
-                    {/*    <WriteBasicImgLabel htmlFor={"problemImage"}>*/}
-                    {/*        클릭*/}
-                    {/*    </WriteBasicImgLabel>*/}
-                    {/*</WriteBasicImgDiv>*/}
-                    <Dragger {...{
-                        name : "file",
-                        mutilple:true,
-                        action : "http://localhost:8080/mp/problems/upload",
-                        headers : {
-                            'Content-Type': 'multipart/form-data',
-                            'Access-Control-Allow-Origin' : 'http://localhost:8080/'
-                        },
-                        withCredentials : true,
-                        beforeUpload : file => {
-                            console.log(file)
-                            // @ts-ignore
-                            setFileList(fileList.concat(file));
-                        },
-                        fileList
-                    }}>
-                        <p className="ant-upload-drag-icon">
-                            <InboxOutlined />
-                        </p>
-                        <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                        <p className="ant-upload-hint">
-                            뭐라뭐라
-                        </p>
-                    </Dragger>
+                    <WriteBasicImgDiv draggable="true">
+                        <CiImageOn style={{fontSize: "57px", marginTop: "10px"}}/>
+                        <h4>문제 이미지 업로드</h4>
+                        <WriteBasicImgLabel htmlFor={"problemImage"}>
+                            클릭
+                        </WriteBasicImgLabel>
+                    </WriteBasicImgDiv>
+                    {/*<Dragger>*/}
+                    {/*    <p className="ant-upload-drag-icon">*/}
+                    {/*        <InboxOutlined />*/}
+                    {/*    </p>*/}
+                    {/*    <p className="ant-upload-text">Click or drag file to this area to upload</p>*/}
+                    {/*    <p className="ant-upload-hint">*/}
+                    {/*        뭐라뭐라*/}
+                    {/*    </p>*/}
+                    {/*</Dragger>*/}
                     <button onClick={handleUpload}>눌러줘</button>
-                    <WriteBasicInput name={"problemImg"} id={"problemImage"} accept="image/*"
-
-                                     style={{display: "none"}} type={"file"}/>
+                    <WriteBasicInput name={"problemImg"} id={"problemImage"} accept="image/*" onChange={(e)=>{
+                        // @ts-ignore
+                        setFileList(fileList.push(e.target.files[0]))
+                        console.log(fileList)
+                    }} required={true} multiple={true}  style={{display: "none"}} type={"file"}/>
                     <br/><br/><br/>
                     <p>문제 정답</p><br/>
                     <WriteBasicInput name={"answer"} onChange={handleChange} required={true}/>

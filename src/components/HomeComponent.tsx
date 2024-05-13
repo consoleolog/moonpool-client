@@ -1,12 +1,16 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import styled from 'styled-components';
-import axios from "axios";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "../index";
+import {changeLoginCheck} from "../store/silce/loginCheck";
 
-const state = {
-    id : 1,
-    pid : 5
-}
+
 function HomeComponents() {
+    const dispatch = useDispatch<AppDispatch>();
+    let loginCheck = useSelector((state:RootState) => {return state.loginCheck})
+    useEffect(() => {
+        dispatch(changeLoginCheck(false))
+    }, []);
     return (
         <ExampleBox>홈 컴포넌트
 
