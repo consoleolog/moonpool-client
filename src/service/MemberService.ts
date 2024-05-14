@@ -1,7 +1,6 @@
 import {MemberLoginType, MemberRegisterType} from "../types/MemberTypes";
 import axios from "axios";
 import memberRepository from "../repository/MemberRepository";
-import cookieUtil from "../util/CookieUtil";
 export const host = `http://localhost:8080/mp/members`
 class MemberService {
 

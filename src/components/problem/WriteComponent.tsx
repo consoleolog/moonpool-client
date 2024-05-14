@@ -1,46 +1,29 @@
-import React, {ChangeEvent, useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect, useRef, useState} from 'react';
 import {Link, useNavigate, useSearchParams} from "react-router-dom";
 import styled from "styled-components";
 import {BlackBg, CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
 import {useDispatch, useSelector} from "react-redux";
-import {changeIsModalOpenTrue, storeType} from "../../store/store";
-import {CiImageOn} from "react-icons/ci";
-import {Button, ConfigProvider, message, Upload, UploadProps} from "antd";
+import {changeIsModalOpenFalse, changeIsModalOpenTrue} from "../../store/store";
+import {Button, ConfigProvider, message} from "antd";
 import {TinyColor} from "@ctrl/tinycolor";
 import {ProblemParamTypes} from "../../types/ProblemTypes";
 import {RootState} from "../../index";
-import {InboxOutlined} from "@ant-design/icons";
-import axios from "axios";
+import {selectMemberId} from "../../store/silce/memberSlice";
+import problemService from "../../service/ProblemService";
 
-const { Dragger } = Upload;
-const props: UploadProps = {
-    name: 'file',
-    multiple: true,
-    action: 'http://localhost:8080/mp/problems/upload',
-    onChange(info) {
-
-        const { status } = info.file;
-        if (status !== 'uploading') {
-            console.log(info.file, info.fileList);
-        }
-        if (status === 'done') {
-            message.success(`${info.file.name} file uploaded successfully.`);
-        } else if (status === 'error') {
-            message.error(`${info.file.name} file upload failed.`);
-        }
-    },
-    onDrop(e) {
-        console.log('Dropped files', e.dataTransfer.files);
-    },
-};
 function WriteComponent() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const isModalOpen = useSelector((state:storeType) => state.isModalOpen);
+    const isModalOpen = useSelector((state:RootState) => state.isModalOpen);
     const loginCheck = useSelector((state:RootState)=>{return state.loginCheck})
     const [searchParams, setSearchParams] = useSearchParams();
     const category = searchParams.get("category");
     const [messageApi, contextHolder] = message.useMessage();
+    const writerId = useSelector(selectMemberId)
+    const quizList: any[] = []
+    const answerList: any[] = []
+    const [quiz, setQuiz] = useState<any>([])
+    const [answer, setAnswer] = useState<any>([])
     const error = (content:string) => {
         messageApi.open({
             type: 'error',
@@ -53,40 +36,59 @@ function WriteComponent() {
         price : 0,
         description : "",
         category : category,
-        level : "",
+        level : "normal",
         answer : 0,
-        writerId : 0
+        writerId : writerId
     }
     const [problemParam, setProblemParam] = useState<ProblemParamTypes>(initState)
-    const [fileList, setFileList] = useState([])
     const handleChange = (e:ChangeEvent<any>)=>{
         problemParam[e.target.name] = e.target.value;
         setProblemParam({...problemParam});
     }
-    const handleUpload = () => {
-        const formData = new FormData();
-        fileList.forEach(file => {
-            formData.append("files", file);
-        })
-        axios.post("http://localhost:8080/mp/problems/upload", formData, {
-            headers : {'Content-Type': 'multipart/form-data'}
-        }).then((response) => {
-            console.log(response)
-        })
-    }
     useEffect(() => {
-        if (!loginCheck){
+        if (writerId === ""){
             error("로그인이 필요한 서비스입니다!")
             navigate("/")
         }
     }, [loginCheck]);
-    
+    const handleClick = ()=>{
+        console.log(quiz)
+        console.log(answer)
+        // problemService.register(problemParam,quiz,answer).then((response)=>{
+        //     console.log(response)
+        //     if(response === "제목을 확인해주세요!"){
+        //         error(response)
+        //     } else if (response === "가격은 음수일수 없습니다!"){
+        //         error(response)
+        //     } else if (response === "문제 사진을 확인해주세요! 사진은 최소 한장은 입력해야합니다!"){
+        //         error(response)
+        //     } else if ( response === "답지 사진을 확인해주세요!"){
+        //         error(response)
+        //     } else {
+        //         setProblemParam({
+        //             title : "",
+        //             price : 0,
+        //             description : "",
+        //             category : category,
+        //             level : "normal",
+        //             answer : 0,
+        //             writerId : writerId,
+        //         })
+        //         // navigate(`/problems/${response}/1`)
+        //     }
+        // }).catch((e)=>{
+        //     console.log(e)
+        //     error("문제 등록 중 오류가 발생했습니다")
+        // })
+    }
+
     return (
         <>
             <CustomBannerBox>
+                {contextHolder}
                 <CustomBanner>
                     <Link to={"/"}><small>HOME</small></Link><br/><br/><br/>
-                    <p style={{fontSize:"25px"}}>문제 등록하기</p>
+                    <p style={{fontSize: "25px"}}>문제 등록하기</p>
                 </CustomBanner>
                 <CustomBannerAside/>
             </CustomBannerBox>
@@ -96,7 +98,7 @@ function WriteComponent() {
                     <WriteBasicInput name={"title"} onChange={handleChange} required={true}/>
                     <br/><br/><br/>
                     <p>과목 선택</p><br/>
-                    <WriteBasicSelect name={"category"} defaultValue={category == null ? "" : category}
+                    <WriteBasicSelect name={"category"} defaultValue={category == null ? "korean" : category}
                                       onChange={handleChange}>
                         <option value="korean">국어</option>
                         <option value="math">수학</option>
@@ -119,28 +121,11 @@ function WriteComponent() {
                     <WriteBasicInput name={"description"} onChange={handleChange} required={true}/>
                     <br/><br/><br/>
                     <p>문제 이미지</p><br/>
-                    <WriteBasicImgDiv draggable="true">
-                        <CiImageOn style={{fontSize: "57px", marginTop: "10px"}}/>
-                        <h4>문제 이미지 업로드</h4>
-                        <WriteBasicImgLabel htmlFor={"problemImage"}>
-                            클릭
-                        </WriteBasicImgLabel>
-                    </WriteBasicImgDiv>
-                    {/*<Dragger>*/}
-                    {/*    <p className="ant-upload-drag-icon">*/}
-                    {/*        <InboxOutlined />*/}
-                    {/*    </p>*/}
-                    {/*    <p className="ant-upload-text">Click or drag file to this area to upload</p>*/}
-                    {/*    <p className="ant-upload-hint">*/}
-                    {/*        뭐라뭐라*/}
-                    {/*    </p>*/}
-                    {/*</Dragger>*/}
-                    <button onClick={handleUpload}>눌러줘</button>
-                    <WriteBasicInput name={"problemImg"} id={"problemImage"} accept="image/*" onChange={(e)=>{
-                        // @ts-ignore
-                        setFileList(fileList.push(e.target.files[0]))
-                        console.log(fileList)
-                    }} required={true} multiple={true}  style={{display: "none"}} type={"file"}/>
+                    <WriteBasicInput accept={"image/*"} multiple={true} onChange={async (e:any)=>{
+                        quizList.push(e.currentTarget.files[0])
+                        setQuiz(quizList)
+
+                    }} type={"file"}/>
                     <br/><br/><br/>
                     <p>문제 정답</p><br/>
                     <WriteBasicInput name={"answer"} onChange={handleChange} required={true}/>
@@ -159,8 +144,7 @@ function WriteComponent() {
                     >
                         <Button type="primary" size="large" onClick={() => {
                             dispatch(changeIsModalOpenTrue())
-                        }}
-                                style={{width: "300px", height: "60px", padding: "0px 30px", marginTop: "30px"}}>
+                        }} style={{width: "300px", height: "60px", padding: "0px 30px", marginTop: "30px"}}>
                             등록
                         </Button>
                     </ConfigProvider>
@@ -174,18 +158,35 @@ function WriteComponent() {
                             <AnswerImgInputLabel htmlFor={"answerImg"}>
                                 <p>이미지 업로드 (클릭)</p>
                             </AnswerImgInputLabel>
-                            <input style={{display:"none"}} id={"answerImg"} type="file"
+                            <AnswerImgInputBtn onClick={handleClick}>진짜 등록</AnswerImgInputBtn>
 
-                                   multiple={true} accept={"image/*"} required={true}/>
-                            <AnswerImgInputBtn onClick={()=>{
-
-                            }}>진짜 등록</AnswerImgInputBtn>
+                            <CancelBtn onClick={() => {
+                                dispatch(changeIsModalOpenFalse())
+                            }}>취소</CancelBtn>
+                            <input style={{visibility:"hidden"}} id={"answerImg"} multiple={true} accept={"image/*"} onChange={ async (e: any) => {
+                                answerList.push(e.currentTarget.files[0])
+                                setAnswer(answerList)
+                            }} type="file" />
                         </UploadModalBox>
                     </BlackBg> : <></>
             }
         </>
     );
 }
+
+export const CancelBtn = styled.button`
+    width: 100%;
+    height: 68px;
+    border: none;
+    color: #fff;
+    margin-top: -100px;
+    background-color: rgb(93, 93, 93);
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgb(66, 66, 66);
+    }
+`
 const AnswerImgInputLabel = styled.label`
     width: 100%;
     height: 100%;
@@ -198,9 +199,10 @@ const AnswerImgInputLabel = styled.label`
 `
 const AnswerImgInputBtn = styled.button`
     width: 100%;
-    height: 50px;
+    height: 65px;
     border: none;
     color: #fff;
+    margin-top: -60px;
     background-color: rgb(236,88,81);
     cursor: pointer;
     &:hover {

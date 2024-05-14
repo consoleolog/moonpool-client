@@ -2,15 +2,16 @@ import React, {ChangeEvent, useState} from 'react';
 import styled from "styled-components";
 import {IoClose} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
-import {changeIsLoginModalOpenFalse, storeType} from "../../store/store";
+import {changeIsLoginModalOpenFalse} from "../../store/store";
 import {BlackBg} from "../../Global.style";
 import {MemberLoginType} from "../../types/MemberTypes";
 import memberService from "../../service/MemberService";
 import { message} from "antd";
-import {AppDispatch} from "../../index";
+import {AppDispatch, RootState} from "../../index";
 import {useNavigate} from "react-router-dom";
 import memberRepository from "../../repository/MemberRepository";
 import {changeLoginCheck} from "../../store/silce/loginCheck";
+import {changeMember} from "../../store/silce/memberSlice";
 let initState = {
     username : "",
     password : ""
@@ -36,7 +37,7 @@ function LoginModal() {
     };
 
     const [loginData, setLoginData] = useState<MemberLoginType>(initState)
-    let isLoginModalOpen = useSelector((state:storeType)=>state.isLoginModalOpen)
+    let isLoginModalOpen = useSelector((state:RootState)=>state.isLoginModalOpen)
     const handleChange = (e:ChangeEvent<HTMLInputElement>):void => {
         loginData[e.target.name] = e.target.value;
         setLoginData({...loginData})
@@ -53,9 +54,11 @@ function LoginModal() {
                 setLoginData(initState)
             } else {
                 success("로그인 성공!")
+                console.log(response)
                 memberRepository.saveUserData(response)
                 dispatch(changeIsLoginModalOpenFalse())
                 dispatch(changeLoginCheck(true))
+                dispatch(changeMember(response))
                 setLoginData({
                     username : "",
                     password : ""

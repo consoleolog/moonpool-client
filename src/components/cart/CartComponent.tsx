@@ -1,15 +1,23 @@
 import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
-import {CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn} from "../../Global.style";
+import {CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
 import {Link} from "react-router-dom";
 import { MdCancel } from "react-icons/md";
+import {useQuery} from "react-query";
+import cartService from "../../service/CartService";
+import {useSelector} from "react-redux";
+import {selectMemberId} from "../../store/silce/memberSlice";
+import {CloseCircleFilled} from "@ant-design/icons";
 
 function CartComponent() {
-
-    // let totalPrice = 0;
-    // for (var key in serverData){
-    //     totalPrice += serverData[key][1].price
-    // }
+    let totalPrice = 0;
+    const memberId = useSelector(selectMemberId);
+    const cartData = useQuery([totalPrice],async=>cartService.getList(memberId))
+    const cartList = cartData.data
+    for (var key in cartList){
+        totalPrice += cartList[key][1].price
+    }
+    console.log(cartList)
     return (
         <>
             <CustomBannerBox>
@@ -30,8 +38,32 @@ function CartComponent() {
                         </tr>
                     </CartThead>
                     <tbody style={{width:'100%',borderTop:"solid 2px rgb(235,235,235)",height:"50px"}}>
+                    {
+                        cartList && cartList.map((item:any,i:number)=>{
+                            return (
+                                <tr key={i} style={{height: "50px"}}>
+                                    <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>
+                                        <td style={{
+                                            width: "80px",
+                                            textAlign: "center",
+                                            color: "rgb(236,88,81),",
+                                            verticalAlign: "middle"
+                                        }}><strong>{item[1].price}C</strong></td>
+                                    <td style={{width: "80px", textAlign: "center", verticalAlign: "middle"}}>
+                                        {/*<CancelIcon onClick={() => {*/}
+                                        {/*<CancelIcon><CloseCircleFilled id={"icon"}/></CancelIcon>*/}
+                                        {/*}}><MdCancel id={"icon"}/></CancelIcon>*/}
+                                    </td>
+                                </tr>
+                            )
+                        })
+                    }
+
+
+
                     {/*{*/}
-                    {/*    serverData.map((item:any,i:number)=>{*/}
+                    {/*    cartData.isLoading ? <></> :*/}
+                    {/*    cartData.data.map((item:any,i:number)=>{*/}
                     {/*        return (*/}
                     {/*            <tr key={i} style={{height: "50px"}}>*/}
                     {/*                <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>*/}
@@ -42,13 +74,15 @@ function CartComponent() {
                     {/*                    verticalAlign: "middle"*/}
                     {/*                }}><strong>{item[1].price}C</strong></td>*/}
                     {/*                <td style={{width: "80px", textAlign: "center", verticalAlign: "middle"}}>*/}
-                    {/*                    <CancelIcon onClick={()=>{*/}
-                    {/*                        handleClickDelete(item[0].id)*/}
-                    {/*                    }} ><MdCancel id={"icon"}/></CancelIcon></td>*/}
+                    {/*                    <CancelIcon onClick={() => {*/}
+
+                    {/*                    }}><MdCancel id={"icon"}/></CancelIcon></td>*/}
                     {/*            </tr>*/}
                     {/*        )*/}
                     {/*    })*/}
                     {/*}*/}
+
+
                     </tbody>
                 </CartTable>
             </CartBox>
@@ -64,7 +98,7 @@ function CartComponent() {
                                 합계
                             </CustomDiv>
                             <Cost>
-                                {/*{totalPrice}C*/}
+                                {totalPrice}C
                             </Cost>
                         </div>
                         <br/><br/>

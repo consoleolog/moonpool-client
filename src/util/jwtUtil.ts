@@ -1,8 +1,6 @@
 import axios from "axios";
 import cookieUtil from "./CookieUtil";
 
-
-
 const jwtAxios = axios.create()
 
 const refreshJWT = async (accessToken:any, refreshToken:any) => {
@@ -15,10 +13,10 @@ const refreshJWT = async (accessToken:any, refreshToken:any) => {
 }
 
 const beforeReq = (config:any) => {
-    // console.log("before request..........")
-    const memberInfo = cookieUtil.getCookie('userCookie')
+    console.log("before request..........")
+    const memberInfo = cookieUtil.getCookie("userCookie")
+    console.log(memberInfo.accessToken + "첫번째 호출..........")
     if(!memberInfo){
-        // console.log("Member NOT FOUND")
         return Promise.reject(
             {response:{
                     data:
@@ -27,23 +25,24 @@ const beforeReq = (config:any) => {
             }
         )
     }
-    const {accessToken} = memberInfo
+    console.log(memberInfo.accessToken+"두번째 호출 --------------")
+    const accessToken = memberInfo.accessToken
+    console.log(accessToken + "세번째 호출 -------------")
     config.headers.Authorization = `Bearer ${accessToken}`
-    // console.log("before request..........end----------")
+    console.log("before request..........end----------")
     return config
 }
 
 const requestFail = (err:any) => {
-    // console.log("request error............")
     return Promise.reject(err)
 }
 
 const beforeRes = async (res:any) => {
-    // console.log("before return response................")
+    console.log("before return response................")
     const memberCookieValue = await cookieUtil.getCookie('userCookie')
-    // console.log(memberCookieValue)
+    console.log(memberCookieValue.accessToken + "비포어 리스폰스 첫번째 호출----------------------")
     const data = res.data
-    // console.log(data)
+    console.log(data+"res.data 값---------------")
     if(data && data.Error === "Error_Access_Token"){
         const result = await refreshJWT(memberCookieValue.accessToken, memberCookieValue.refreshToken)
         //new accessToken -> refreshToken -> CookieValue
@@ -54,11 +53,12 @@ const beforeRes = async (res:any) => {
         originalRequest.headers.Authorization = `Bearer ${result.accessToken}`
         return axios(originalRequest);
     }
+    console.log(res+"값-------------------")
     return res
 }
 
 const responseFail = (err:any) => {
-    // console.log("response fail error..............")
+    console.log("response fail error..............")
     return Promise.reject(err)
 }
 

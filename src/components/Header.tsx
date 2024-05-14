@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import {useDispatch, useSelector} from "react-redux";
 import {Twirl as Hamburger} from 'hamburger-react'
@@ -9,21 +9,18 @@ import {useNavigate} from "react-router-dom";
 import {changeIsLoginModalOpenTrue, changeIsNavOpenFalse, changeIsNavOpenTrue} from "../store/store";
 import LoginModal from "./member/LoginModal";
 import memberService from "../service/MemberService";
-import memberRepository from "../repository/MemberRepository";
 import {changeLoginCheck} from "../store/silce/loginCheck";
-import {useQuery} from "react-query";
+import {logout, selectDisplayName, selectMemberId} from "../store/silce/memberSlice";
 
 function Header() {
     // 변수 선언
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    let navOpen : string = useSelector((state:RootState)=>{return state.isNavOpen})
+    const navOpen : string = useSelector((state:RootState)=>{return state.isNavOpen})
     const [isOpen, setOpen] = useState(false)
     // redux loginCheck 슬라이스
-    const check = useSelector((state:RootState)=>{return state.loginCheck})
-    let result = useQuery([check],memberRepository.getUserData)
-
-
+    const check = useSelector(selectMemberId)
+    const displayName = useSelector(selectDisplayName)
     return (
         <>
             <CustomHeader className={`${navOpen}`}>
@@ -61,7 +58,7 @@ function Header() {
                 <HeaderEndBox>
                     <HeaderEndContents/>
                     {
-                        result.isLoading || result.status==="error"?
+                        check === "" ?
                             <>
                                 <HeaderEndContents onClick={()=>{
                                     dispatch(changeIsLoginModalOpenTrue())
@@ -73,11 +70,12 @@ function Header() {
                                 <HeaderEndContents onClick={()=>{
                                     navigate("/members/mypage")
                                 }}>
-                                    {result.data?.displayName}
+                                    {displayName}
                                 </HeaderEndContents>
                                 <HeaderEndContents onClick={()=>{
                                     memberService.logout()
                                     dispatch(changeLoginCheck(false))
+                                    dispatch(logout())
                                 }}>
                                     logout
                                 </HeaderEndContents>

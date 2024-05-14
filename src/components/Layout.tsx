@@ -5,6 +5,7 @@ import {RootState} from "../index";
 
 function Layout({ children }: { children: ReactNode }) {
     let navOpen : string = useSelector((state :RootState)=>{return state.isNavOpen})
+
     return (
         <>
             <Header/>

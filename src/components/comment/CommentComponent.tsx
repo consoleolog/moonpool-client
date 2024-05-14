@@ -4,16 +4,25 @@ import {useNavigate, useParams, useSearchParams} from "react-router-dom";
 import commentService from "../../service/CommentService";
 import {useQuery} from "react-query";
 import {CommentDataType} from "../../types/CommentTypes";
+import {message} from "antd";
 
 interface CommentComponentProps {
     userId?: any
 }
-
 function CommentComponent({userId}: CommentComponentProps) {
     const {problemId} = useParams();
     const [searchParams, setSearchParams] = useSearchParams();
     const commentPage = searchParams.get("commentPage");
     const navigate = useNavigate();
+    const [sendCheck, setSendCheck] = useState<boolean>(false);
+    const [messageApi, contextHolder] = message.useMessage();
+    const error = (content:string) => {
+        messageApi.open({
+            type: 'error',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
     const initState: CommentDataType = {
         content: "",
         parentId: problemId,
@@ -24,13 +33,27 @@ function CommentComponent({userId}: CommentComponentProps) {
         commentData[e.target.name] = e.target.value;
         setCommentData({...commentData});
     }
-    let result = useQuery([problemId, searchParams.get("commentPage")], async () => {
+    let result = useQuery([problemId, searchParams.get("commentPage"),sendCheck], async () => {
         if ( commentPage !== null ){
             return commentService.getList(problemId, commentPage)
         }
     })
+    const handleClick = () => {
+        commentService.post(commentData).then((response) => {
+            if (response === "내용을 채워주세요!"){error(response)}
+            setSendCheck(!sendCheck)
+            setCommentData({
+                content: "",
+                parentId: problemId,
+                writerId: userId,
+            })
+        }).catch(()=>{
+            error("댓글 작성 중 오류 발생")
+        })
+    }
     return (
         <CommentBoxContainer>
+            {contextHolder}
             <CommentBox>
                 {
                     result.isLoading ? <></> :
@@ -62,8 +85,8 @@ function CommentComponent({userId}: CommentComponentProps) {
                         })
                 }
             </PageNationBox>
-            <CommentInput name={"content"} onChange={handleChange}/>
-            <CommentBtn>전송</CommentBtn>
+            <CommentInput value={commentData.content} name={"content"} onChange={handleChange}/>
+            <CommentBtn onClick={handleClick}>전송</CommentBtn>
             <br/><br/><br/><br/><br/><br/>
         </CommentBoxContainer>
     );

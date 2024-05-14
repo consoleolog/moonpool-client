@@ -2,14 +2,15 @@ import React, {useEffect} from 'react';
 import styled from 'styled-components';
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../index";
-import {changeLoginCheck} from "../store/silce/loginCheck";
+import {selectMemberId} from "../store/silce/memberSlice";
 
 
 function HomeComponents() {
     const dispatch = useDispatch<AppDispatch>();
-    let loginCheck = useSelector((state:RootState) => {return state.loginCheck})
+    let member = useSelector((state:RootState)=>{return state.member})
+
     useEffect(() => {
-        dispatch(changeLoginCheck(false))
+        // dispatch(changeLoginCheck(false))
     }, []);
     return (
         <ExampleBox>홈 컴포넌트

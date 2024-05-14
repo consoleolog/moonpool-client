@@ -1,5 +1,5 @@
 export interface ProblemParamTypes {
-    [key:string] : string | number | null;
+    [key:string] : string | number | null | FileList;
     title : string
     price : number
     description : string
@@ -28,7 +28,7 @@ export interface ProblemDataType {
     category : string
     level : string
     answer :  number
-    quizList :  never[]
+    quizFileNames :  never[]
     answerList :  never[]
     delFlag : boolean
     writerId : string | number

@@ -7,15 +7,13 @@ class MemberRepository {
         cookieUtil.saveCookie("userCookie",JSON.stringify(userData));
     }
     public static getUserData = () => {
-        let userData :MemberDataType =  cookieUtil.getCookie("userCookie")
-
+        return cookieUtil.getCookie("userCookie")
+    }
+    public static getUserCookie = () => {
+        let userData = cookieUtil.getCookie("userCookie")
         return {
-            memberId: userData.memberId,
-            username: userData.username,
-            displayName: userData.displayName,
-            intro: userData.intro,
-            educationState: userData.educationState,
-            coin: userData.coin,
+            accessToken: userData.accessToken,
+            refreshToken: userData.refreshToken,
         }
     }
     public static removeUserData = ()=>{

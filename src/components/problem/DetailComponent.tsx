@@ -1,4 +1,4 @@
-import React, {lazy, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import { CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
 import {Link, useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
@@ -6,8 +6,10 @@ import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../../index";
 import problemService from "../../service/ProblemService";
 import {ProblemDataType} from "../../types/ProblemTypes";
-import memberRepository from "../../repository/MemberRepository";
 import CommentComponent from "../comment/CommentComponent";
+import {selectMemberId} from "../../store/silce/memberSlice";
+import cartService from "../../service/CartService";
+import {message} from "antd";
 
 const initState = {
     problemId : null,
@@ -17,7 +19,7 @@ const initState = {
     category : "",
     level : "",
     answer : 0,
-    quizList :  [],
+    quizFileNames :  [],
     answerList :  [],
     delFlag : false,
     writerId : ""
@@ -28,24 +30,50 @@ function DetailComponent() {
     const navigate = useNavigate();
     const {problemId} = useParams();
     const [serverData, setServerData] = useState<ProblemDataType>(initState);
-    const [userId, setUserId] = useState<any>();
-    const check = useSelector((state:RootState)=>{return state.loginCheck})
+    const userId = useSelector(selectMemberId)
+    const [messageApi, contextHolder] = message.useMessage();
+    const error = (content:string) => {
+        messageApi.open({
+            type: 'error',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
+    const success = (content:string) => {
+        messageApi.open({
+            type: 'success',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
+    const cartData = {
+        problemId : problemId,
+        ownerId : userId
+    }
+
+    const cartHandleClick = () => {
+        console.log(cartData)
+        cartService.register(cartData).then(response=>{
+            if (response === "ERROR"){
+                error("에러가 발생했습니다!")
+            } else if (response === "SUCCESS"){
+                success("장바구니 추가 완료")
+            }
+        })
+    }
     useEffect(() => {
         if (problemId != null) {
             problemService.getOne(problemId).then((response) => {
-                console.log(response)
                 let copy = {...response}
                 setServerData(copy)
             })
-        }
-        if(check){
-            setUserId(memberRepository.getUserId())
         }
     }, [problemId]);
 
     return (
         <>
             <CustomBannerBox>
+                {contextHolder}
                 <CustomBanner>
                     <Link to={"/"}><small>HOME</small></Link><br/><br/><br/>
                     <p style={{fontSize: "25px"}}>{serverData.title}</p><br/>
@@ -64,7 +92,13 @@ function DetailComponent() {
                     </div>
                     {/*<QuizImg src={"https://placehold.co/600x400"}/>*/}
                     {/*<QuizImg src={`http://localhost:8080/mp/problems/view/${serverData.quizImgName}`} />*/}
-
+                    {
+                        serverData.quizFileNames.map((item:string)=>{
+                            return (
+                                <QuizImg src={`http://localhost:8080/mp/problems/view/${item}`}/>
+                            )
+                        })
+                    }
                 </div>
             </DetailBox>
             <AsideBox>
@@ -92,9 +126,7 @@ function DetailComponent() {
                                 }}>
                                     답지 구매하기
                                 </PurchaseBtn>
-                                <CartAddBtn onClick={()=>{
-
-                                }}>
+                                <CartAddBtn onClick={cartHandleClick}>
                                     장바구니 추가
                                 </CartAddBtn>
                                 <h4 className={"font-xl mt-20"}>100C</h4>

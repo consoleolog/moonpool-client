@@ -6,15 +6,19 @@ import problemService from "../../service/ProblemService";
 import {ProblemListType} from "../../types/ProblemTypes";
 import {message} from "antd";
 import {useQuery} from "react-query";
+import {useSelector} from "react-redux";
+import {RootState} from "../../index";
 
 
 function ListComponent() {
     const navigate = useNavigate();
+    // 쿼리 파라미터
     const {category,pageNum} = useParams();
+    // ajax response 저장할 스테이트
     const [serverData, setServerData] = useState<ProblemListType>();
-    let subject = useQuery([category],()=>{
-        return problemService.changeCategory(category)})
-    const loginCheck = sessionStorage.getItem("loginCheck");
+    // 과목 배너 바꾸는 쿼리
+    const subject = useQuery([category],()=>{return problemService.changeCategory(category)})
+    const loginCheck = useSelector((state:RootState)=>{return state.loginCheck})
     const [messageApi, contextHolder] = message.useMessage();
     const error = (content:string) => {
         messageApi.open({
@@ -30,7 +34,7 @@ function ListComponent() {
         })
     }, [category,pageNum]);
     const moveToPost = () => {
-        if (loginCheck === "false"){
+        if (!loginCheck){
             error("로그인이 필요한 서비스입니다")
         } else {
             navigate(`/problems/write?category=${category}`)

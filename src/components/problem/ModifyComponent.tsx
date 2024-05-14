@@ -3,17 +3,18 @@ import {Link, useLoaderData, useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import {BlackBg, CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn, Wrapper} from "../../Global.style";
 import {useDispatch, useSelector} from "react-redux";
-import {changeIsModalOpenTrue, storeType} from "../../store/store";
+import {changeIsModalOpenTrue} from "../../store/store";
 import {CiImageOn} from "react-icons/ci";
 import {Button, ConfigProvider} from "antd";
 import {TinyColor} from "@ctrl/tinycolor";
+import {RootState} from "../../index";
 
 function ModifyComponent() {
     const writerId = useLoaderData()
     const dispatch = useDispatch();
     const quizRef = useRef<any>(null);
     const navigate = useNavigate();
-    let isModalOpen = useSelector((state:storeType) => state.isModalOpen);
+    let isModalOpen = useSelector((state:RootState) => state.isModalOpen);
     const [quizImgUrl, setQuizImgUrl] = useState("");
     const [quizFile, setQuizFile] = useState<any>("");
     const [answerImgUrl, setAnswerImgUrl] = useState("");
