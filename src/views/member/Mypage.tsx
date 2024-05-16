@@ -25,7 +25,7 @@ function Mypage() {
                     }}>
                         설정
                     </ProfileTapContents>
-                    <ProfileTapContents onClick={()=>{navigate("./made")}}>
+                    <ProfileTapContents onClick={()=>{navigate("./made/1")}}>
                         내 활동
                     </ProfileTapContents>
                 </ProfileTapContentsBox>

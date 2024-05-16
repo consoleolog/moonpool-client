@@ -1,30 +1,33 @@
 import cookieUtil from "../util/CookieUtil";
-import {MemberDataType} from "../types/MemberTypes";
+import {MemberLoginResponseType} from "../types/MemberTypes";
 
 class MemberRepository {
 
-    public static saveUserData = (userData:object) => {
+    static saveUserData = (userData:MemberLoginResponseType) => {
         cookieUtil.saveCookie("userCookie",JSON.stringify(userData));
+        cookieUtil.saveCookie("userId",userData.memberId)
     }
-    public static getUserData = () => {
-        return cookieUtil.getCookie("userCookie")
-    }
-    public static getUserCookie = () => {
-        let userData = cookieUtil.getCookie("userCookie")
-        return {
-            accessToken: userData.accessToken,
-            refreshToken: userData.refreshToken,
-        }
-    }
-    public static removeUserData = ()=>{
+    static removeUserData = ()=>{
         cookieUtil.removeCookie("userCookie")
+        cookieUtil.removeCookie("userId")
     }
-    public static getUserId = () => {
-        return cookieUtil.getCookie("userCookie").memberId
+    static loginTrue = () => {
+        sessionStorage.setItem("loginCheck",JSON.stringify(true))
     }
-    public static getUserName = () => {
-        return cookieUtil.getCookie("userCookie").username
+    static loginFalse = () => {
+        sessionStorage.setItem("loginCheck",JSON.stringify(false))
     }
+    static getLoginCheck = () => {
+        return sessionStorage.getItem("loginCheck")
+    }
+    static getUserId = () => {
+        return cookieUtil.getCookie("userId")
+    }
+    static getUserDisplayName = () => {
+
+    }
+
+
 
 }
 export default MemberRepository;

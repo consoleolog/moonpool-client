@@ -6,8 +6,7 @@ import problemService from "../../service/ProblemService";
 import {ProblemListType} from "../../types/ProblemTypes";
 import {message} from "antd";
 import {useQuery} from "react-query";
-import {useSelector} from "react-redux";
-import {RootState} from "../../index";
+import memberRepository from "../../repository/MemberRepository";
 
 
 function ListComponent() {
@@ -18,7 +17,6 @@ function ListComponent() {
     const [serverData, setServerData] = useState<ProblemListType>();
     // 과목 배너 바꾸는 쿼리
     const subject = useQuery([category],()=>{return problemService.changeCategory(category)})
-    const loginCheck = useSelector((state:RootState)=>{return state.loginCheck})
     const [messageApi, contextHolder] = message.useMessage();
     const error = (content:string) => {
         messageApi.open({
@@ -34,6 +32,7 @@ function ListComponent() {
         })
     }, [category,pageNum]);
     const moveToPost = () => {
+        const loginCheck = memberRepository.getLoginCheck()
         if (!loginCheck){
             error("로그인이 필요한 서비스입니다")
         } else {
@@ -154,7 +153,7 @@ const SearchBtn = styled.button`
         color: #fff;
     }
 `
-const PageBtn = styled.button`
+export const PageBtn = styled.button`
     width: 30px;
     height: 30px;
     font-weight: 550;
@@ -168,7 +167,7 @@ const PageBtn = styled.button`
         color: #fff;
     }
 `
-const PageNationBox = styled.div`
+export const PageNationBox = styled.div`
     width: 80%;
     height: 40px;
     margin: 80px auto;

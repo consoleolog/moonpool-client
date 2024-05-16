@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import styled from "styled-components";
 import {useDispatch, useSelector} from "react-redux";
 import {Twirl as Hamburger} from 'hamburger-react'
@@ -9,8 +9,8 @@ import {useNavigate} from "react-router-dom";
 import {changeIsLoginModalOpenTrue, changeIsNavOpenFalse, changeIsNavOpenTrue} from "../store/store";
 import LoginModal from "./member/LoginModal";
 import memberService from "../service/MemberService";
-import {changeLoginCheck} from "../store/silce/loginCheck";
-import {logout, selectDisplayName, selectMemberId} from "../store/silce/memberSlice";
+import {useQuery} from "react-query";
+import memberRepository from "../repository/MemberRepository";
 
 function Header() {
     // 변수 선언
@@ -18,9 +18,13 @@ function Header() {
     const navigate = useNavigate();
     const navOpen : string = useSelector((state:RootState)=>{return state.isNavOpen})
     const [isOpen, setOpen] = useState(false)
-    // redux loginCheck 슬라이스
-    const check = useSelector(selectMemberId)
-    const displayName = useSelector(selectDisplayName)
+    const loginResult = useQuery([memberRepository.getLoginCheck()],memberService.loginCheck)
+    const check = loginResult.data
+    const doLogout = () => {
+        memberService.logout()
+        memberRepository.loginFalse()
+    }
+
     return (
         <>
             <CustomHeader className={`${navOpen}`}>
@@ -58,7 +62,7 @@ function Header() {
                 <HeaderEndBox>
                     <HeaderEndContents/>
                     {
-                        check === "" ?
+                        !check  ?
                             <>
                                 <HeaderEndContents onClick={()=>{
                                     dispatch(changeIsLoginModalOpenTrue())
@@ -70,13 +74,9 @@ function Header() {
                                 <HeaderEndContents onClick={()=>{
                                     navigate("/members/mypage")
                                 }}>
-                                    {displayName}
+                                    mypage
                                 </HeaderEndContents>
-                                <HeaderEndContents onClick={()=>{
-                                    memberService.logout()
-                                    dispatch(changeLoginCheck(false))
-                                    dispatch(logout())
-                                }}>
+                                <HeaderEndContents onClick={doLogout}>
                                     logout
                                 </HeaderEndContents>
                             </>
@@ -118,24 +118,23 @@ function Header() {
                     </CenterBox>
                 </NavSideContentsSearchBox>
                 <NavSideContents onClick={()=>{
-
+                    navigate("/problems/korean/1")
                 }} style={{marginTop: "5px"}}>국어</NavSideContents>
                 <NavSideContents onClick={()=>{
-
+                    navigate("/problems/math/1")
                 }}>수학 </NavSideContents>
                 <NavSideContents onClick={()=>{
-
+                    navigate("/problems/english/1")
                 }}>영어 </NavSideContents>
                 <NavSideContents onClick={()=>{
-
+                    navigate("/problems/social/1")
                 }}>사회 탐구</NavSideContents>
                 <NavSideContents onClick={()=>{
-
+                    navigate("/problems/science/1")
                 }}>과학 탐구</NavSideContents>
             </HeaderSideBox>
             {/*로그인 폼 모달*/}
             <LoginModal/>
-
         </>
     );
 }

@@ -8,7 +8,7 @@ const salesRouter = [
         path : "",
         children : [
             {
-                path : "items/answer/:id",
+                path : "items/answer/:problemId",
                 element : <Suspense fallback={LoadingComponent()}><Answer/></Suspense>
             }
         ]

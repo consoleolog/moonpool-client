@@ -8,18 +8,17 @@ import {Button, ConfigProvider, message} from "antd";
 import {TinyColor} from "@ctrl/tinycolor";
 import {ProblemParamTypes} from "../../types/ProblemTypes";
 import {RootState} from "../../index";
-import {selectMemberId} from "../../store/silce/memberSlice";
 import problemService from "../../service/ProblemService";
+import memberRepository from "../../repository/MemberRepository";
 
 function WriteComponent() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const isModalOpen = useSelector((state:RootState) => state.isModalOpen);
-    const loginCheck = useSelector((state:RootState)=>{return state.loginCheck})
     const [searchParams, setSearchParams] = useSearchParams();
     const category = searchParams.get("category");
     const [messageApi, contextHolder] = message.useMessage();
-    const writerId = useSelector(selectMemberId)
+    const writerId = memberRepository.getUserId()
     const quizList: any[] = []
     const answerList: any[] = []
     const [quiz, setQuiz] = useState<any>([])
@@ -46,40 +45,35 @@ function WriteComponent() {
         setProblemParam({...problemParam});
     }
     useEffect(() => {
-        if (writerId === ""){
-            error("로그인이 필요한 서비스입니다!")
-            navigate("/")
-        }
-    }, [loginCheck]);
+
+    }, []);
     const handleClick = ()=>{
-        console.log(quiz)
-        console.log(answer)
-        // problemService.register(problemParam,quiz,answer).then((response)=>{
-        //     console.log(response)
-        //     if(response === "제목을 확인해주세요!"){
-        //         error(response)
-        //     } else if (response === "가격은 음수일수 없습니다!"){
-        //         error(response)
-        //     } else if (response === "문제 사진을 확인해주세요! 사진은 최소 한장은 입력해야합니다!"){
-        //         error(response)
-        //     } else if ( response === "답지 사진을 확인해주세요!"){
-        //         error(response)
-        //     } else {
-        //         setProblemParam({
-        //             title : "",
-        //             price : 0,
-        //             description : "",
-        //             category : category,
-        //             level : "normal",
-        //             answer : 0,
-        //             writerId : writerId,
-        //         })
-        //         // navigate(`/problems/${response}/1`)
-        //     }
-        // }).catch((e)=>{
-        //     console.log(e)
-        //     error("문제 등록 중 오류가 발생했습니다")
-        // })
+        problemService.register(problemParam,quiz,answer).then((response)=>{
+            console.log(response)
+            if(response === "제목을 확인해주세요!"){
+                error(response)
+            } else if (response === "가격은 음수일수 없습니다!"){
+                error(response)
+            } else if (response === "문제 사진을 확인해주세요! 사진은 최소 한장은 입력해야합니다!"){
+                error(response)
+            } else if ( response === "답지 사진을 확인해주세요!"){
+                error(response)
+            } else {
+                setProblemParam({
+                    title : "",
+                    price : 0,
+                    description : "",
+                    category : category,
+                    level : "normal",
+                    answer : 0,
+                    writerId : writerId,
+                })
+                navigate(`/problems/${response}/1`)
+            }
+        }).catch((e)=>{
+            console.log(e)
+            error("문제 등록 중 오류가 발생했습니다")
+        })
     }
 
     return (
@@ -187,7 +181,7 @@ export const CancelBtn = styled.button`
         background-color: rgb(66, 66, 66);
     }
 `
-const AnswerImgInputLabel = styled.label`
+export const AnswerImgInputLabel = styled.label`
     width: 100%;
     height: 100%;
     text-align: center;
@@ -197,7 +191,7 @@ const AnswerImgInputLabel = styled.label`
     font-size: 25px;
     cursor: pointer;
 `
-const AnswerImgInputBtn = styled.button`
+export const AnswerImgInputBtn = styled.button`
     width: 100%;
     height: 65px;
     border: none;
@@ -209,7 +203,7 @@ const AnswerImgInputBtn = styled.button`
         background-color: rgb(223, 79, 73);
     }
 `
-const UploadModalBox = styled.div`
+export const UploadModalBox = styled.div`
     padding: 50px 0 0 0 ;
     width: 400px;
     height: 200px;

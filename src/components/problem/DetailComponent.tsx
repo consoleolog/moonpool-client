@@ -2,15 +2,15 @@ import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import { CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
 import {Link, useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "../../index";
 import problemService from "../../service/ProblemService";
 import {ProblemDataType} from "../../types/ProblemTypes";
 import CommentComponent from "../comment/CommentComponent";
-import {selectMemberId} from "../../store/silce/memberSlice";
 import cartService from "../../service/CartService";
 import {message} from "antd";
-
+import salesService from "../../service/SalesService";
+import {SalesDataType} from "../../types/SalesTypes";
+import {CartDataTypes} from "../../types/CartTypes";
+import memberRepository from "../../repository/MemberRepository";
 const initState = {
     problemId : null,
     title : "",
@@ -26,12 +26,12 @@ const initState = {
 }
 
 function DetailComponent() {
-    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const {problemId} = useParams();
     const [serverData, setServerData] = useState<ProblemDataType>(initState);
-    const userId = useSelector(selectMemberId)
+    const userId = memberRepository.getUserId()
     const [messageApi, contextHolder] = message.useMessage();
+    // alert 에러 생성 함수
     const error = (content:string) => {
         messageApi.open({
             type: 'error',
@@ -39,6 +39,7 @@ function DetailComponent() {
             duration : 1,
         });
     };
+    // alert success 생성 함수
     const success = (content:string) => {
         messageApi.open({
             type: 'success',
@@ -46,13 +47,54 @@ function DetailComponent() {
             duration : 1,
         });
     };
+    // 장바구니 데이터
     const cartData = {
         problemId : problemId,
         ownerId : userId
     }
+    // 구매 데이터
+    const salesData = {
+        problemId : problemId,
+        memberId : userId
+    }
+    const moveToModify = (problemId: number | null) => {
+        navigate(`/problems/modify/${problemId}`)
+    }
+    const registerCheck = () => {
+        cartService.registerCheck(cartData).then((response) => {
+            if (response==="ALREADY_EXIST"){
+                error("이미 장바구니에 추가된 상품입니다")
+            } else {
+                cartHandleClick(cartData)
+            }
+        }).catch((error) => {
+            error("장바구니 추가 중 오류가 발생했습니다")
+        })
+    }
+    const purchase = (salesData:SalesDataType) => {
+        salesService.purchase(salesData).then(response=>{
+            if (response === "SUCCESS"){
+                success("답지 구매 완료")
+            } else if (response === "ERROR"){
+                error("답지 구매 중 에러 발생!")
+            }
+        })
+    }
+    const purchaseCheck = () => {
+        salesService.purchaseCheck(salesData).then(response=>{
+            if ( response === "SUCCESS"){
+                purchase(salesData)
+            } else if ( response === "ALREADY_PURCHASED"){
+                error("이미 구매한 답지입니다")
+            } else {
+                error("문제 등록 중 오류가 발생했습니다")
+            }
 
-    const cartHandleClick = () => {
-        console.log(cartData)
+        }).catch(err=>{
+            error("에러 발생")
+        })
+    }
+    const cartHandleClick = (cartData : CartDataTypes) => {
         cartService.register(cartData).then(response=>{
             if (response === "ERROR"){
                 error("에러가 발생했습니다!")
@@ -60,6 +102,13 @@ function DetailComponent() {
                 success("장바구니 추가 완료")
             }
         })
+    }
+    const handleDelete = () => {
+        if (typeof problemId === "string") {
+            problemService.deleteOne(problemId, userId).then(response=>{
+                navigate(`../${serverData.category}/1`)
+            }).then(()=>success("삭제 완료"))
+        }
     }
     useEffect(() => {
         if (problemId != null) {
@@ -90,14 +139,13 @@ function DetailComponent() {
                         <strong>문제 설명</strong><br/><br/><br/>
                         <p>{serverData.description}</p>
                     </div>
-                    {/*<QuizImg src={"https://placehold.co/600x400"}/>*/}
-                    {/*<QuizImg src={`http://localhost:8080/mp/problems/view/${serverData.quizImgName}`} />*/}
                     {
+                        serverData.quizFileNames.length !== 0 ?
                         serverData.quizFileNames.map((item:string)=>{
                             return (
-                                <QuizImg src={`http://localhost:8080/mp/problems/view/${item}`}/>
+                                <QuizImg key={item} src={`http://localhost:8080/mp/problems/view/${item}`}/>
                             )
-                        })
+                        }) :  <QuizImg src={"https://placehold.co/600x400"}/>
                     }
                 </div>
             </DetailBox>
@@ -106,30 +154,24 @@ function DetailComponent() {
                     userId === serverData.writerId ?
                         <Aside style={{height:"300px"}}>
                             <div style={{width: "90%", margin: "0 auto"}}>
-                                <CartAddBtn style={{marginTop:"30px"}} onClick={()=>{
-
-                                }}>
+                                <CartAddBtn style={{marginTop:"30px"}} onClick={()=>moveToModify(serverData.problemId)}>
                                     문제 수정하기
                                 </CartAddBtn>
-                                <ProblemDeleteBtn onClick={()=>{
-
-                                }}>
+                                <ProblemDeleteBtn onClick={handleDelete}>
                                     문제 삭제하기
                                 </ProblemDeleteBtn>
-                                <h4 className={"font-xl mt-20"}>100C</h4>
+                                <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
                             </div>
                         </Aside> :
                         <Aside>
                             <div style={{width: "90%", margin: "0 auto"}}>
-                                <PurchaseBtn onClick={()=>{
-
-                                }}>
+                                <PurchaseBtn onClick={purchaseCheck}>
                                     답지 구매하기
                                 </PurchaseBtn>
-                                <CartAddBtn onClick={cartHandleClick}>
+                                <CartAddBtn onClick={registerCheck}>
                                     장바구니 추가
                                 </CartAddBtn>
-                                <h4 className={"font-xl mt-20"}>100C</h4>
+                                <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
                                 <div><AnswerInput
                                                   name={"answer"} placeholder={"정답을 맞춰보세요!!"}/></div>
                                 <div>

@@ -11,7 +11,7 @@ const Main = lazy(()=>import("../components/HomeComponent"))
 const rootRouter = createBrowserRouter([
     {
         path : "/",
-        element : <Home/>,
+        element : <Suspense fallback={LoadingComponent()}><Home/></Suspense>,
         children : [
             {
                 path: "problems",

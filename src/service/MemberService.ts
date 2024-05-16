@@ -1,6 +1,7 @@
 import {MemberLoginType, MemberRegisterType} from "../types/MemberTypes";
 import axios from "axios";
 import memberRepository from "../repository/MemberRepository";
+import cookieUtil from "../util/CookieUtil";
 export const host = `http://localhost:8080/mp/members`
 class MemberService {
 
@@ -20,7 +21,9 @@ class MemberService {
     public static logout = () => {
         memberRepository.removeUserData()
     }
-
+    static loginCheck = ():boolean => {
+        return !!cookieUtil.getCookie("userCookie");
+    }
     public static getUserData = async (username : string, memberId : string) => {
         let result = await axios.get(`${host}/get-user-data?username=${username}&memberId=${memberId}`)
         return result.data

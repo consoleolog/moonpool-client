@@ -1,63 +1,70 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Link, useLoaderData, useNavigate} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import styled from "styled-components";
 import {BlackBg, CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn, Wrapper} from "../../Global.style";
 import {useDispatch, useSelector} from "react-redux";
-import {changeIsModalOpenTrue} from "../../store/store";
-import {CiImageOn} from "react-icons/ci";
-import {Button, ConfigProvider} from "antd";
+import {changeIsModalOpenFalse, changeIsModalOpenTrue} from "../../store/store";
+import {Button, ConfigProvider, message} from "antd";
 import {TinyColor} from "@ctrl/tinycolor";
 import {RootState} from "../../index";
+import memberRepository from "../../repository/MemberRepository";
+import problemService from "../../service/ProblemService";
+import {AnswerImgInputBtn, AnswerImgInputLabel, CancelBtn, UploadModalBox} from "./WriteComponent";
 
 function ModifyComponent() {
-    const writerId = useLoaderData()
+    const writerId = memberRepository.getUserId()
     const dispatch = useDispatch();
-    const quizRef = useRef<any>(null);
     const navigate = useNavigate();
-    let isModalOpen = useSelector((state:RootState) => state.isModalOpen);
-    const [quizImgUrl, setQuizImgUrl] = useState("");
-    const [quizFile, setQuizFile] = useState<any>("");
-    const [answerImgUrl, setAnswerImgUrl] = useState("");
-    const [answerFile, setAnswerFile] = useState<any>("");
+    const {problemId} = useParams();
+    const quizList: any[] = []
+    const answerList: any[] = []
+    const [quiz, setQuiz] = useState<any>([])
+    const [answer, setAnswer] = useState<any>([])
+    const isModalOpen = useSelector((state:RootState) => state.isModalOpen);
     const [problemData, setProblemData] = useState<any>({
-        id : "",
+        problemId : "",
         title : "",
         price : 0,
         description : "",
-        category : "korean",
-        level : "easy",
+        category : "",
+        level : "",
         answer : "",
         writerId : writerId
     })
-
-    const problemFileDto = {
-        quizFile :quizFile,
-        answerFiles : answerFile,
-    }
+    const [messageApi, contextHolder] = message.useMessage();
+    const error = (content:string) => {
+        messageApi.open({
+            type: 'error',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
+    useEffect(() => {
+        if (typeof problemId === "string") {
+            problemService.getOne(problemId).then(response=>{
+                let copy = {...response}
+                setProblemData(copy)
+            })
+        }
+    }, []);
     const onChangeProblemData = (e:any)=>{
         problemData[e.target.name] = e.target.value
         setProblemData({...problemData})
     }
-    const onChangeQuizData = (e:any)=>{
-        if ( quizRef.current !== undefined){
-            let quizFile = quizRef.current.files[0];
-            setQuizFile(quizFile)
-            if ( typeof quizFile !== "string"){
-                let quizImgUrl = URL.createObjectURL(quizFile);
-                setQuizImgUrl(quizImgUrl);
+    const handleClick = () => {
+        problemService.modify(problemData, quiz, answer).then((response)=>{
+            console.log(response)
+            if(response === "제목을 확인해주세요!"){
+                error(response)
+            } else if (response === "가격은 음수일수 없습니다!"){
+                error(response)
             }
-        }
-    }
-    const onChangeAnswerData = (e:any)=>{
-        if ( quizRef.current !== undefined){
-            let quizFile = quizRef.current.files[0];
-            setAnswerFile(quizFile)
-            if ( typeof quizFile !== "string"){
-                let quizImgUrl = URL.createObjectURL(quizFile);
-                setAnswerImgUrl(quizImgUrl);
+            else {
+                navigate(`../../problems/detail/${problemData.problemId}/?commentPage=1`)
             }
-        }
+        })
     }
+
     return (
         <>
             <CustomBannerBox>
@@ -100,20 +107,10 @@ function ModifyComponent() {
                                      onChange={onChangeProblemData} required={true}/>
                     <br/><br/><br/>
                     <p>문제 이미지</p><br/>
-                    <WriteBasicImgDiv draggable="true">
-                        <CiImageOn style={{fontSize: "57px", marginTop: "10px"}}/>
-                        <h4>문제 이미지 업로드</h4>
-                        <WriteBasicImgLabel htmlFor={"problemImage"}>
-                            클릭
-                        </WriteBasicImgLabel>
-                    </WriteBasicImgDiv>
-                    {
-                        quizImgUrl !== "" ? <img src={`${quizImgUrl}`} alt=""/> : <></>
-                    }
-                    <WriteBasicInput name={"problemImg"} id={"problemImage"} accept="image/*"
-                                     onChange={onChangeQuizData}
-                                     ref={quizRef}
-                                     style={{display: "none"}} type={"file"}/>
+                    <WriteBasicInput accept={"image/*"} multiple={true} onChange={async (e:any)=>{
+                        quizList.push(e.currentTarget.files[0])
+                        setQuiz(quizList)
+                    }} type={"file"}/>
                     <br/><br/><br/>
                     <p>문제 정답</p><br/>
                     <WriteBasicInput name={"answer"} value={problemData.answer}
@@ -145,11 +142,19 @@ function ModifyComponent() {
             {
                 isModalOpen ?
                     <BlackBg>
-                        <input type="file" onChange={onChangeAnswerData} ref={quizRef}
-                               multiple={true} accept={"image/*"} required={true}/>
-                        <button onClick={()=>{
-
-                        }}>진짜 등록</button>
+                        <UploadModalBox>
+                            <AnswerImgInputLabel htmlFor={"answerImg"}>
+                                <p>이미지 업로드 (클릭)</p>
+                            </AnswerImgInputLabel>
+                            <AnswerImgInputBtn onClick={handleClick}>진짜 수정</AnswerImgInputBtn>
+                            <CancelBtn onClick={() => {
+                                dispatch(changeIsModalOpenFalse())
+                            }}>취소</CancelBtn>
+                            <input style={{visibility:"hidden"}} id={"answerImg"} multiple={true} accept={"image/*"} onChange={ async (e: any) => {
+                                answerList.push(e.currentTarget.files[0])
+                                setAnswer(answerList)
+                            }} type="file" />
+                        </UploadModalBox>
                     </BlackBg> : <></>
             }
         </>

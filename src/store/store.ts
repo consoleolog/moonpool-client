@@ -1,7 +1,6 @@
-import {combineReducers, configureStore, createSlice} from '@reduxjs/toolkit'
+import {combineReducers, configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit'
 import { persistReducer } from "redux-persist";
 import loginSlice from "./silce/loginSlice";
-import loginCheck from "./silce/loginCheck";
 import memberSlice from "./silce/memberSlice";
 import storage from "redux-persist/lib/storage"
 const reducers = combineReducers({
@@ -16,18 +15,7 @@ const persistConfig = {
 const persistedReducer = persistReducer(persistConfig, reducers)
 
 
-let isSearchModalOpen = createSlice({
-    name : 'isSearchModalOpen',
-    initialState : "opacity-0",
-    reducers : {
-        changeIsSearchModalOpenTrue : () => {
-            return "opacity-1"
-        },
-        changeIsSearchModalOpenFalse : () => {
-            return "opacity-0"
-        }
-    }
-})
+
 let isNavOpen = createSlice({
     name : "isNavOpen",
     initialState: "nav-close",
@@ -37,6 +25,15 @@ let isNavOpen = createSlice({
         },
         changeIsNavOpenFalse: (state : string) => {
             return "nav-close";
+        }
+    }
+})
+let isIconOpen = createSlice({
+    name : "isIconOpen",
+    initialState: false,
+    reducers : {
+        changeIconOpen : (state : boolean)=>{
+            return !state;
         }
     }
 })
@@ -64,32 +61,21 @@ let isLoginModalOpen = createSlice({
         }
     }
 })
-let headerTapState = createSlice({
-    name : "headerTapState",
-    initialState : 0,
-    reducers : {
-        changeHeaderTapState : (state)=>{
-            return state
-        },
 
-    }
-})
+
 export default configureStore({
     reducer: {
         isModalOpen : isModalOpen.reducer,
+        isIconOpen : isIconOpen.reducer,
         isNavOpen : isNavOpen.reducer,
         isLoginModalOpen : isLoginModalOpen.reducer,
-        isSearchModalOpen : isSearchModalOpen.reducer,
-        headerTapState : headerTapState.reducer,
         "loginSlice" : loginSlice,
-        "loginCheck" : loginCheck,
         "member" : memberSlice,
         persistedReducer,
     },
 
 })
-export let { changeHeaderTapState } = headerTapState.actions
-export let { changeIsSearchModalOpenTrue, changeIsSearchModalOpenFalse } = isSearchModalOpen.actions
+export let { changeIconOpen } = isIconOpen.actions;
 export let { changeIsNavOpenTrue , changeIsNavOpenFalse }  = isNavOpen.actions
 export let {changeIsModalOpenTrue, changeIsModalOpenFalse}  = isModalOpen.actions;
 export let { changeIsLoginModalOpenTrue, changeIsLoginModalOpenFalse } = isLoginModalOpen.actions;

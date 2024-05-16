@@ -23,7 +23,7 @@ const problemRouter = [
                 element: <Suspense fallback={LoadingComponent()}><Write/></Suspense>,
             }
             ,{
-                path : "modify/:id",
+                path : "modify/:problemId",
                 element : <Suspense fallback={LoadingComponent()}><Modify/></Suspense>,
             },
 

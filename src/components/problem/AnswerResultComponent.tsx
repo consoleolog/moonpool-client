@@ -1,11 +1,35 @@
 import React, {useEffect, useState} from 'react';
 import {CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn} from "../../Global.style";
-import {Link} from "react-router-dom";
+import {Link, useParams} from "react-router-dom";
 import styled from "styled-components";
+import problemService from "../../service/ProblemService";
+import {ProblemDataType, ProblemDetailType} from "../../types/ProblemTypes";
+const initState = {
+    problemId : "",
+    title : "",
+    price : 0,
+    description : "",
+    category : "",
+    level : "",
+    answer : 0,
+    quizFileNames :  [],
+    answerList :  [],
+    answerFileNames : [],
+    writerId : ""
+}
 
 function AnswerResultComponent() {
-    const [serverData, setServerData] = useState<any>();
-
+    const [serverData, setServerData] = useState<ProblemDetailType>(initState);
+    const {problemId} = useParams()
+    useEffect(() => {
+        if (typeof problemId === "string") {
+            problemService.getOne(problemId).then(response=>{
+                let copy = {...response}
+                setServerData(copy)
+            })
+        }
+    }, []);
+    console.log(serverData)
     return (
         <>
             <CustomBannerBox>
@@ -22,11 +46,14 @@ function AnswerResultComponent() {
 
             <DetailBox>
                 <div style={{width: "95%", margin: "0 auto"}}><br/><br/><br/>
-                    {/*<QuizImg src={"https://placehold.co/600x400"}/>*/}
                     {
-                        serverData ? <QuizImg src={`http://localhost:8080/mp/problems/view/${serverData.answerImgName}`} /> : <></>
+                        serverData.answerFileNames.length !== 0 ?
+                            serverData.answerFileNames.map((item:string)=>{
+                                return (
+                                    <QuizImg key={item} src={`http://localhost:8080/mp/problems/view/${item}`}/>
+                                )
+                            }) :  <QuizImg src={"https://placehold.co/600x400"}/>
                     }
-
                 </div>
             </DetailBox>
         </>

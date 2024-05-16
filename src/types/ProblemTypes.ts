@@ -8,6 +8,16 @@ export interface ProblemParamTypes {
     answer :  number
     writerId : string | number
 }
+export interface ProblemEditParamType {
+    problemId : string
+    title : string
+    price : number
+    description : string
+    category : string | null
+    level : string
+    answer :  number
+    writerId : string | number
+}
 export interface ProblemFileParamTypes {
     quizFile : File | string
     answerFiles : File | string
@@ -32,4 +42,16 @@ export interface ProblemDataType {
     answerList :  never[]
     delFlag : boolean
     writerId : string | number
+}
+export interface ProblemDetailType {
+    problemId : string
+    title : string
+    price : number
+    description : string
+    category : string
+    level : string
+    answer :  number
+    writerId : string
+    answerFileNames : any[]
+    quizFileNames : any[]
 }

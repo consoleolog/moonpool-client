@@ -1,23 +1,27 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState } from 'react';
 import styled from "styled-components";
 import {CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
 import {Link} from "react-router-dom";
 import { MdCancel } from "react-icons/md";
 import {useQuery} from "react-query";
 import cartService from "../../service/CartService";
-import {useSelector} from "react-redux";
-import {selectMemberId} from "../../store/silce/memberSlice";
 import {CloseCircleFilled} from "@ant-design/icons";
+import memberRepository from "../../repository/MemberRepository";
 
 function CartComponent() {
     let totalPrice = 0;
-    const memberId = useSelector(selectMemberId);
-    const cartData = useQuery([totalPrice],async=>cartService.getList(memberId))
-    const cartList = cartData.data
-    for (var key in cartList){
+    const memberId = memberRepository.getUserId();
+    const [clickCheck, setClickCheck] = useState<Boolean>(false)
+    const cartData = useQuery([clickCheck],async=>cartService.getList(memberId))
+    const cartList = cartData.data ? cartData.data : [];
+    const handleDeleteClick = (cartId : string) => {
+        cartService.delete(cartId, memberId).then((response)=>{
+            setClickCheck(!clickCheck)
+        })
+    }
+    for (let key in cartList){
         totalPrice += cartList[key][1].price
     }
-    console.log(cartList)
     return (
         <>
             <CustomBannerBox>
@@ -39,50 +43,24 @@ function CartComponent() {
                     </CartThead>
                     <tbody style={{width:'100%',borderTop:"solid 2px rgb(235,235,235)",height:"50px"}}>
                     {
-                        cartList && cartList.map((item:any,i:number)=>{
-                            return (
-                                <tr key={i} style={{height: "50px"}}>
-                                    <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>
+                        cartData.isLoading ? <></> :
+                            cartList.map((item:any,i:number)=>{
+                                return (
+                                    <tr key={i} style={{height: "50px"}}>
+                                        <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>
                                         <td style={{
                                             width: "80px",
                                             textAlign: "center",
                                             color: "rgb(236,88,81),",
                                             verticalAlign: "middle"
                                         }}><strong>{item[1].price}C</strong></td>
-                                    <td style={{width: "80px", textAlign: "center", verticalAlign: "middle"}}>
-                                        {/*<CancelIcon onClick={() => {*/}
-                                        {/*<CancelIcon><CloseCircleFilled id={"icon"}/></CancelIcon>*/}
-                                        {/*}}><MdCancel id={"icon"}/></CancelIcon>*/}
-                                    </td>
-                                </tr>
-                            )
-                        })
+                                        <td style={{width: "80px", textAlign: "center", verticalAlign: "middle"}}>
+                                            <CancelIcon onClick={()=>handleDeleteClick(item[0].cartId)}>X</CancelIcon>
+                                        </td>
+                                    </tr>
+                                )
+                            })
                     }
-
-
-
-                    {/*{*/}
-                    {/*    cartData.isLoading ? <></> :*/}
-                    {/*    cartData.data.map((item:any,i:number)=>{*/}
-                    {/*        return (*/}
-                    {/*            <tr key={i} style={{height: "50px"}}>*/}
-                    {/*                <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>*/}
-                    {/*                <td style={{*/}
-                    {/*                    width: "80px",*/}
-                    {/*                    textAlign: "center",*/}
-                    {/*                    color: "rgb(236,88,81),",*/}
-                    {/*                    verticalAlign: "middle"*/}
-                    {/*                }}><strong>{item[1].price}C</strong></td>*/}
-                    {/*                <td style={{width: "80px", textAlign: "center", verticalAlign: "middle"}}>*/}
-                    {/*                    <CancelIcon onClick={() => {*/}
-
-                    {/*                    }}><MdCancel id={"icon"}/></CancelIcon></td>*/}
-                    {/*            </tr>*/}
-                    {/*        )*/}
-                    {/*    })*/}
-                    {/*}*/}
-
-
                     </tbody>
                 </CartTable>
             </CartBox>

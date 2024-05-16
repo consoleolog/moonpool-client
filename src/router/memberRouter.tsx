@@ -30,11 +30,11 @@ const memberRouter = [
                         element : <Suspense fallback={LoadingComponent()}><MypageSettingComponent/></Suspense>
                     },
                     {
-                        path : "made",
+                        path : "made/:pageNum",
                         element : <Suspense fallback={LoadingComponent()}><MypageMadePComponent/></Suspense>
                     },
                     {
-                        path : "buy",
+                        path : "buy/:pageNum",
                         element : <Suspense fallback={LoadingComponent()}><MypageBuyPComponent/></Suspense>
                     },
                     {
