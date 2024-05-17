@@ -102,6 +102,9 @@ class ProblemService {
         let result = await jwtAxios.post(`${host1}-user/post`,formData,headers)
         return result.data;
     }
-
+    static search = async (searchText : string, pageNum : string|undefined) => {
+        const result = await axios.get(`${host}/${pageNum}/?searchText=${searchText}`)
+        return result.data;
+    }
 }
 export default ProblemService;

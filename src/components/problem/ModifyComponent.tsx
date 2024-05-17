@@ -45,6 +45,7 @@ function ModifyComponent() {
                 let copy = {...response}
                 setProblemData(copy)
             })
+            dispatch(changeIsModalOpenFalse())
         }
     }, []);
     const onChangeProblemData = (e:any)=>{

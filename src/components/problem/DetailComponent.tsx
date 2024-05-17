@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import { CustomBanner, CustomBannerAside, CustomBannerBox} from "../../Global.style";
-import {Link, useLocation, useNavigate, useParams, useSearchParams} from "react-router-dom";
+import {Link, useNavigate, useParams, useSearchParams} from "react-router-dom";
 import problemService from "../../service/ProblemService";
 import {ProblemDataType} from "../../types/ProblemTypes";
 import CommentComponent from "../comment/CommentComponent";
@@ -31,6 +31,8 @@ function DetailComponent() {
     const [serverData, setServerData] = useState<ProblemDataType>(initState);
     const userId = memberRepository.getUserId()
     const [messageApi, contextHolder] = message.useMessage();
+    const [answer, setAnswer] = useState<number>(0);
+    const loginCheck = memberRepository.getLoginCheck()
     // alert 에러 생성 함수
     const error = (content:string) => {
         messageApi.open({
@@ -47,6 +49,9 @@ function DetailComponent() {
             duration : 1,
         });
     };
+    const info = (content : string) => {
+        messageApi.info(`${content}`);
+    };
     // 장바구니 데이터
     const cartData = {
         problemId : problemId,
@@ -57,19 +62,56 @@ function DetailComponent() {
         problemId : problemId,
         memberId : userId
     }
+    const answerData = {
+        answer : answer,
+        problemId : problemId,
+        memberId : userId
+    }
+    const checkAnswer = () => {
+        if (!loginCheck){
+            info("로그인을 먼저 진행해주세요!")
+        } else {
+            salesService.answerCheck(answerData).then(response => {
+                if (response === "INCORRECT") {
+                    info("정답이 아닙니다")
+                    setAnswer(0)
+                } else if (response === "CORRECT") {
+                    success("정답입니다! 100코인 지급 완료")
+                    setAnswer(0)
+                }
+            })
+        }
+    }
     const moveToModify = (problemId: number | null) => {
-        navigate(`/problems/modify/${problemId}`)
+        if (!loginCheck){
+            info("로그인이 필요합니다")
+        } else {
+            navigate(`/problems/modify/${problemId}`)
+        }
+    }
+    const cartHandleClick = (cartData : CartDataTypes) => {
+        cartService.register(cartData).then(response=>{
+            if (response === "ERROR"){
+                error("에러가 발생했습니다!")
+            } else if (response === "SUCCESS"){
+                success("장바구니 추가 완료")
+            }
+        })
     }
     const registerCheck = () => {
-        cartService.registerCheck(cartData).then((response) => {
-            if (response==="ALREADY_EXIST"){
-                error("이미 장바구니에 추가된 상품입니다")
-            } else {
-                cartHandleClick(cartData)
-            }
-        }).catch((error) => {
-            error("장바구니 추가 중 오류가 발생했습니다")
-        })
+        if (!loginCheck){
+            error("로그인을 해주세요!")
+        } else {
+            cartService.registerCheck(cartData).then((response) => {
+                if (response === "ALREADY_EXIST") {
+                    error("이미 장바구니에 추가된 상품입니다")
+                } else {
+                    cartHandleClick(cartData)
+                }
+            }).catch((error) => {
+                error("장바구니 추가 중 오류가 발생했습니다")
+            })
+        }
     }
     const purchase = (salesData:SalesDataType) => {
         salesService.purchase(salesData).then(response=>{
@@ -81,33 +123,29 @@ function DetailComponent() {
         })
     }
     const purchaseCheck = () => {
-        salesService.purchaseCheck(salesData).then(response=>{
-            if ( response === "SUCCESS"){
-                purchase(salesData)
-            } else if ( response === "ALREADY_PURCHASED"){
-                error("이미 구매한 답지입니다")
-            } else {
-                error("문제 등록 중 오류가 발생했습니다")
-            }
+        if (!loginCheck){
+            error("로그인을 먼저 해주세요")
+        } else {
+            salesService.purchaseCheck(salesData).then(response => {
+                if (response === "SUCCESS") {
+                    purchase(salesData)
+                } else if (response === "ALREADY_PURCHASED") {
+                    error("이미 구매한 답지입니다")
+                } else {
+                    error("문제 등록 중 오류가 발생했습니다")
+                }
 
-        }).catch(err=>{
-            error("에러 발생")
-        })
-    }
-    const cartHandleClick = (cartData : CartDataTypes) => {
-        cartService.register(cartData).then(response=>{
-            if (response === "ERROR"){
-                error("에러가 발생했습니다!")
-            } else if (response === "SUCCESS"){
-                success("장바구니 추가 완료")
-            }
-        })
+            }).catch(err => {
+                error("에러 발생")
+            })
+        }
     }
     const handleDelete = () => {
         if (typeof problemId === "string") {
             problemService.deleteOne(problemId, userId).then(response=>{
+                alert("문제 삭제 완료")
                 navigate(`../${serverData.category}/1`)
-            }).then(()=>success("삭제 완료"))
+            }).catch(()=>error("삭제 중 오류 발생"))
         }
     }
     useEffect(() => {
@@ -172,12 +210,10 @@ function DetailComponent() {
                                     장바구니 추가
                                 </CartAddBtn>
                                 <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
-                                <div><AnswerInput
-                                                  name={"answer"} placeholder={"정답을 맞춰보세요!!"}/></div>
+                                <div><AnswerInput type={"number"} value={answer} onChange={(e:any)=>setAnswer(e.target.value)}
+                                    name={"answer"} placeholder={"정답을 맞춰보세요!!"}/></div>
                                 <div>
-                                    <AnswerBtn onClick={()=>{
-
-                                    }}>
+                                    <AnswerBtn onClick={checkAnswer}>
                                         정답 제출하기
                                     </AnswerBtn>
                                 </div>

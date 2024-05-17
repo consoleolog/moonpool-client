@@ -1,20 +1,5 @@
-import {combineReducers, configureStore, createSlice, PayloadAction} from '@reduxjs/toolkit'
-import { persistReducer } from "redux-persist";
+import { configureStore, createSlice} from '@reduxjs/toolkit'
 import loginSlice from "./silce/loginSlice";
-import memberSlice from "./silce/memberSlice";
-import storage from "redux-persist/lib/storage"
-const reducers = combineReducers({
-    member : memberSlice
-})
-const persistConfig = {
-    key: 'root',
-    storage,
-    whitelist : ['member'],
-}
-
-const persistedReducer = persistReducer(persistConfig, reducers)
-
-
 
 let isNavOpen = createSlice({
     name : "isNavOpen",
@@ -70,12 +55,9 @@ export default configureStore({
         isNavOpen : isNavOpen.reducer,
         isLoginModalOpen : isLoginModalOpen.reducer,
         "loginSlice" : loginSlice,
-        "member" : memberSlice,
-        persistedReducer,
     },
 
 })
-export let { changeIconOpen } = isIconOpen.actions;
 export let { changeIsNavOpenTrue , changeIsNavOpenFalse }  = isNavOpen.actions
 export let {changeIsModalOpenTrue, changeIsModalOpenFalse}  = isModalOpen.actions;
 export let { changeIsLoginModalOpenTrue, changeIsLoginModalOpenFalse } = isLoginModalOpen.actions;

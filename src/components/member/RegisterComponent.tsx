@@ -57,6 +57,7 @@ function RegisterCompontent() {
             }
         })
     }
+    console.log(registerData)
     return (
         <>
             <CustomBannerBox>

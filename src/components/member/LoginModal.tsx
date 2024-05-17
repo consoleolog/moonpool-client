@@ -10,7 +10,6 @@ import { message} from "antd";
 import {AppDispatch, RootState} from "../../index";
 import {useNavigate} from "react-router-dom";
 import memberRepository from "../../repository/MemberRepository";
-import {changeMember} from "../../store/silce/memberSlice";
 let initState = {
     username : "",
     password : ""
@@ -55,8 +54,8 @@ function LoginModal() {
                 success("로그인 성공!")
                 memberRepository.saveUserData(response)
                 dispatch(changeIsLoginModalOpenFalse())
-                dispatch(changeMember(response))
                 memberRepository.loginTrue()
+                window.location.reload()
                 setLoginData({
                     username : "",
                     password : ""

@@ -1,8 +1,10 @@
-import {MemberLoginType, MemberRegisterType} from "../types/MemberTypes";
+import {MemberDataType, MemberLoginType, MemberRegisterType} from "../types/MemberTypes";
 import axios from "axios";
 import memberRepository from "../repository/MemberRepository";
 import cookieUtil from "../util/CookieUtil";
+import jwtAxios from "../util/jwtUtil";
 export const host = `http://localhost:8080/mp/members`
+const host1 = `http://localhost:8080/mp/login/members`
 class MemberService {
 
     public static login = async (loginData : MemberLoginType) => {
@@ -24,10 +26,6 @@ class MemberService {
     static loginCheck = ():boolean => {
         return !!cookieUtil.getCookie("userCookie");
     }
-    public static getUserData = async (username : string, memberId : string) => {
-        let result = await axios.get(`${host}/get-user-data?username=${username}&memberId=${memberId}`)
-        return result.data
-    }
     public static register = async (registerData : MemberRegisterType) => {
         if (registerData.username === ""){
             return "Username_Blank"
@@ -47,6 +45,16 @@ class MemberService {
         let result = await axios.post(`${host}/register`,registerData)
         return result.data;
     }
-
+    static getUserData = async (memberId : string) => {
+        const result = await jwtAxios.get(`${host1}-data?memberId=${memberId}`)
+        return result.data
+    }
+    static editUserData = async (memberData :MemberDataType)=>{
+        if (memberData.displayName === ""){
+            return "DisplayName_Blank"
+        }
+        const result = await jwtAxios.post(`${host1}/update`,memberData)
+        return result.data;
+    }
 }
 export default MemberService;

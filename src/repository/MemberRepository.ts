@@ -17,8 +17,8 @@ class MemberRepository {
     static loginFalse = () => {
         sessionStorage.setItem("loginCheck",JSON.stringify(false))
     }
-    static getLoginCheck = () => {
-        return sessionStorage.getItem("loginCheck")
+    static getLoginCheck = () :boolean => {
+        return cookieUtil.getCookie("userId")
     }
     static getUserId = () => {
         return cookieUtil.getCookie("userId")

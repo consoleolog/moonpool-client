@@ -1,25 +1,24 @@
 import React, {useEffect, useState} from 'react';
 import styled from 'styled-components';
 import {CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn} from "../../Global.style";
-import {Link, useNavigate, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams, useSearchParams} from "react-router-dom";
 import problemService from "../../service/ProblemService";
 import {ProblemListType} from "../../types/ProblemTypes";
 import {message} from "antd";
-import {useQuery} from "react-query";
 import memberRepository from "../../repository/MemberRepository";
 
 
-function ListComponent() {
+function SearchResultComponent() {
     const navigate = useNavigate();
     // 쿼리 파라미터
-    let {category,pageNum} = useParams();
-    // ajax response 저장할 스테이트
+    const {category,pageNum} = useParams();
     const [serverData, setServerData] = useState<ProblemListType>();
     const [searchText, setSearchText] = useState<string>("");
     // 과목 배너 바꾸는 쿼리
-    const subject = useQuery([category],()=>{return problemService.changeCategory(category)})
+    const [searchParams, setSearchParams] = useSearchParams();
+    const ST = searchParams.get("searchText")
+    let subjectTitle : string = ST+" 에 대한 검색 결과"
     const [searchCheck, setSearchCheck] = useState<boolean>(true);
-    let subjectTitle = searchCheck ? subject.data : searchText+" 에 대한 검색 결과";
     const [messageApi, contextHolder] = message.useMessage();
     const error = (content:string) => {
         messageApi.open({
@@ -29,12 +28,13 @@ function ListComponent() {
         });
     };
     useEffect(() => {
-        problemService.getList(pageNum,category).then((response)=>{
-            let copy = {...response}
-            setServerData(copy)
-            setSearchCheck(true)
-            setSearchText("")
-        })
+        if (typeof ST ==="string"){
+            setSearchText(ST);
+            problemService.search(ST,pageNum).then(response=>{
+                let copy = {...response}
+                setServerData(copy)
+            })
+        }
     }, [category,pageNum]);
     const moveToPost = () => {
         const loginCheck = memberRepository.getLoginCheck()
@@ -45,7 +45,7 @@ function ListComponent() {
         }
     }
     const handleSearch = () => {
-        problemService.search(searchText, pageNum = "1" ).then((response)=>{
+        problemService.search(searchText, pageNum).then((response)=>{
             let copy = {...response}
             setServerData(copy)
             setSearchCheck(false)
@@ -85,37 +85,23 @@ function ListComponent() {
             </GreyBg>
             <PageNationBox>
                 {
-                    !searchCheck ?
-                        serverData && serverData.next > 11 ?
-                            <PageBtn onClick={()=>navigate(`../${serverData?.prev}/?searchText=${searchText}`)}>이전</PageBtn>
-                            :<></>:
-                        serverData && serverData.next > 11 ?
-                            <PageBtn onClick={()=>navigate(`../${category}/${serverData?.prev}`)}>이전</PageBtn> :
-                            <></>
+                    serverData && serverData.next > 11 ?
+                        <PageBtn onClick={()=>navigate(`../${serverData?.prev}/?searchText=${searchText}`)}>이전</PageBtn>
+                        :<></>
                 }
                 {
-                    !searchCheck ?
-                        serverData && serverData.numList.map((item:number,i)=>{
-                            return (
-                                <PageBtn key={i} onClick={()=>{
-                                    navigate(`../${item}/?searchText=${searchText}`)
-                                }}>{item}</PageBtn>
-                            )
-                        }):
-                        serverData && serverData.numList.map((item:number,i)=>{
+                    serverData && serverData.numList.map((item:number,i)=>{
                         return (
                             <PageBtn key={i} onClick={()=>{
-                                navigate(`../${category}/${item}`)
+                                navigate(`../${item}/?searchText=${searchText}`)
                             }}>{item}</PageBtn>
                         )
                     })
                 }
                 {
                     // 이전
-                   !searchCheck ? serverData && serverData.start > 0  ?
-                           <PageBtn onClick={()=>navigate(`../${serverData?.next}//?searchText=${searchText}`)}>다음</PageBtn> :<></> :
-                       serverData && serverData.start > 0  ?
-                           <PageBtn onClick={()=>navigate(`../${category}/${serverData?.next}`)}>다음</PageBtn> :<></>
+                    serverData && serverData.start > 0  ?
+                        <PageBtn onClick={()=>navigate(`../${serverData?.next}/?searchText=${searchText}`)}>다음</PageBtn> :<></>
                 }
             </PageNationBox>
         </WhiteBg>
@@ -206,4 +192,4 @@ export const PageNationBox = styled.div`
     display: flex;
     justify-content: end;
 `
-export default ListComponent;
+export default SearchResultComponent;

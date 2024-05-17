@@ -52,7 +52,6 @@ function MypageBuyPComponent() {
                 }
             </GreyBg>
             <PageNationBox>
-                <PageBtn>{'<<'}</PageBtn>
                 {
                     serverData && serverData.numList.map((item:number,i:number)=>{
                         return (
@@ -62,9 +61,6 @@ function MypageBuyPComponent() {
                         )
                     })
                 }
-                <PageBtn onClick={()=>{
-
-                }}>{'>>'}</PageBtn>
             </PageNationBox>
         </SettingTapContentsBox>
         </div>

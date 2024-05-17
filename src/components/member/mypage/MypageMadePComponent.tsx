@@ -55,7 +55,7 @@ function MypageMadePComponent() {
                 }
             </GreyBg>
             <PageNationBox>
-                <PageBtn>{'<<'}</PageBtn>
+
                 {
                     serverData && serverData.numList.map((item:number,i:number)=>{
                         return (
@@ -65,7 +65,6 @@ function MypageMadePComponent() {
                         )
                     })
                 }
-                <PageBtn onClick={moveToNext}>{'>>'}</PageBtn>
             </PageNationBox>
         </SettingTapContentsBox>
         </div>

@@ -1,11 +1,11 @@
 import {lazy, Suspense} from "react";
 import LoadingComponent from "../components/LoadingComponent";
 
-const HomeComponent = lazy(()=>import("../components/HomeComponent"))
 const Detail = lazy(()=>import("../components/problem/DetailComponent"))
 const List = lazy(()=>import("../components/problem/ListComponent"))
 const Write = lazy(()=>import("../components/problem/WriteComponent"))
 const Modify = lazy(()=>import("../components/problem/ModifyComponent"))
+const Search = lazy(()=>import("../components/problem/SearchResultComponent"))
 const problemRouter = [
     {
         path : "",
@@ -13,6 +13,10 @@ const problemRouter = [
             {
                 path : "detail/:problemId",
                 element :  <Suspense fallback={LoadingComponent()}><Detail/></Suspense>,
+            },
+            {
+                path : ":pageNum/",
+                element :  <Suspense fallback={LoadingComponent()}><Search/></Suspense>,
             },
             {
                 path: ":category/:pageNum",

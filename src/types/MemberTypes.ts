@@ -2,6 +2,7 @@ export interface MemberLoginType {
     [key: string] : string;
 }
 export interface MemberDataType {
+    [key : string] : string | undefined | number
     memberId : string
     username : string
     displayName : string

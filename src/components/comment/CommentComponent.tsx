@@ -5,6 +5,7 @@ import commentService from "../../service/CommentService";
 import {useQuery} from "react-query";
 import {CommentDataType} from "../../types/CommentTypes";
 import {message} from "antd";
+import memberRepository from "../../repository/MemberRepository";
 
 interface CommentComponentProps {
     userId?: any
@@ -14,6 +15,7 @@ function CommentComponent({userId}: CommentComponentProps) {
     const [searchParams, setSearchParams] = useSearchParams();
     const commentPage = searchParams.get("commentPage");
     const navigate = useNavigate();
+    const loginCheck = memberRepository.getLoginCheck();
     const [sendCheck, setSendCheck] = useState<boolean>(false);
     const [messageApi, contextHolder] = message.useMessage();
     const error = (content:string) => {
@@ -39,17 +41,23 @@ function CommentComponent({userId}: CommentComponentProps) {
         }
     })
     const handleClick = () => {
-        commentService.post(commentData).then((response) => {
-            if (response === "내용을 채워주세요!"){error(response)}
-            setSendCheck(!sendCheck)
-            setCommentData({
-                content: "",
-                parentId: problemId,
-                writerId: userId,
+        if (!loginCheck){
+            error("로그인을 안하면 댓글 작성이 안됩니다!")
+        } else {
+            commentService.post(commentData).then((response) => {
+                if (response === "내용을 채워주세요!") {
+                    error(response)
+                }
+                setSendCheck(!sendCheck)
+                setCommentData({
+                    content: "",
+                    parentId: problemId,
+                    writerId: userId,
+                })
+            }).catch(() => {
+                error("댓글 작성 중 오류 발생")
             })
-        }).catch(()=>{
-            error("댓글 작성 중 오류 발생")
-        })
+        }
     }
     return (
         <CommentBoxContainer>

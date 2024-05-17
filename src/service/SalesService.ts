@@ -1,4 +1,4 @@
-import {SalesDataType} from "../types/SalesTypes";
+import {AnswerDataType, SalesDataType, SalesListDataTotalType, SalesListDataType} from "../types/SalesTypes";
 import jwtAxios from "../util/jwtUtil";
 import {Params} from "react-router-dom";
 import axios from "axios";
@@ -23,5 +23,21 @@ class SalesService {
         const result = await jwtAxios.get(`${host}/made-list/${pageNum}?memberId=${memberId}`)
         return result.data;
     }
+    static purchaseAll = async (salesListData : SalesListDataTotalType) => {
+        const result = await jwtAxios.post(`${host}/purchase-all`, salesListData)
+        return result.data;
+    }
+    static answerCheck = async (answerData: AnswerDataType) => {
+        const result = await jwtAxios.post(`${host}/answer/check`, answerData)
+        return result.data;
+    }
+    static purchaseCheckAll = async (salesListData : SalesListDataType) => {
+        if (salesListData.problemIdList.length === 0){
+            return "LIST_BLANK"
+        }
+        const result = await jwtAxios.post(`${host}/purchased-check`, salesListData)
+        return result.data;
+    }
+
 }
 export default SalesService;

@@ -23,6 +23,7 @@ function Header() {
     const doLogout = () => {
         memberService.logout()
         memberRepository.loginFalse()
+        window.location.reload();
     }
 
     return (

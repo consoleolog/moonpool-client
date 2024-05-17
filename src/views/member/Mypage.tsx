@@ -1,16 +1,30 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Outlet, useNavigate} from "react-router-dom";
 import styled from "styled-components";
+import {MemberDataType} from "../../types/MemberTypes";
+import memberService from "../../service/MemberService";
+import memberRepository from "../../repository/MemberRepository";
 
 function Mypage() {
     const navigate = useNavigate();
+    const memberId = memberRepository.getUserId()
+    const [serverData, setServerData] = useState<MemberDataType>();
+    useEffect(() => {
+        memberService.getUserData(memberId).then(response=>{
+            let copy = {...response}
+            setServerData(copy);
+        })
+    }, []);
     return (
         <>
             <MypageProfileBox>
                 <ProfileImgBox>
                     <ProfileImg src={`${process.env.PUBLIC_URL}/graduate_5360916.png`} alt=""/>
                 </ProfileImgBox>
-                {/*<ProfileName>{userInfo.displayName}</ProfileName>*/}
+                {
+                    serverData && serverData ?
+                <ProfileName>{serverData.displayName}</ProfileName> : <></>
+                }
             </MypageProfileBox>
 
             <ProfileTapBox>
@@ -20,11 +34,11 @@ function Mypage() {
                     }}>
                         프로필
                     </ProfileTapContents>
-                    <ProfileTapContents onClick={()=>{
-                        navigate("./settings")
-                    }}>
-                        설정
-                    </ProfileTapContents>
+                    {/*<ProfileTapContents onClick={()=>{*/}
+                    {/*    navigate("./settings")*/}
+                    {/*}}>*/}
+                    {/*    설정*/}
+                    {/*</ProfileTapContents>*/}
                     <ProfileTapContents onClick={()=>{navigate("./made/1")}}>
                         내 활동
                     </ProfileTapContents>

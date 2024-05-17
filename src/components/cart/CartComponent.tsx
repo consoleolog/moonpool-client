@@ -7,23 +7,73 @@ import {useQuery} from "react-query";
 import cartService from "../../service/CartService";
 import {CloseCircleFilled} from "@ant-design/icons";
 import memberRepository from "../../repository/MemberRepository";
+import salesService from "../../service/SalesService";
+import {message} from "antd";
+import {SalesListDataTotalType, SalesListDataType} from "../../types/SalesTypes";
 
 function CartComponent() {
     let totalPrice = 0;
+    let problemIdList:number[] = []
     const memberId = memberRepository.getUserId();
     const [clickCheck, setClickCheck] = useState<Boolean>(false)
     const cartData = useQuery([clickCheck],async=>cartService.getList(memberId))
     const cartList = cartData.data ? cartData.data : [];
+    for (let key in cartList){
+        totalPrice += cartList[key][1].price
+    }
+    const [messageApi, contextHolder] = message.useMessage();
+    const error = (content:string) => {
+        messageApi.open({
+            type: 'error',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
+    const success = (content:string) => {
+        messageApi.open({
+            type: 'success',
+            content: `${content}`,
+            duration : 1,
+        });
+    };
+    const salesListData = {
+        problemIdList : problemIdList,
+        memberId : memberId,
+    }
+    const salesListTotalData = {
+        problemIdList : problemIdList,
+        totalPrice : totalPrice,
+        memberId : memberId,
+    }
     const handleDeleteClick = (cartId : string) => {
         cartService.delete(cartId, memberId).then((response)=>{
             setClickCheck(!clickCheck)
         })
     }
-    for (let key in cartList){
-        totalPrice += cartList[key][1].price
+    const handleCheckPurchase = () => {
+        salesService.purchaseCheckAll(salesListData).then(response=>{
+            if (response==="LIST_BLANK"){
+                error("장바구니가 비어있습니다!")
+            } else if(response === "ALREADY_PURCHASED"){
+                error("이미 구매한 상품이 있습니다!")
+            } else if (response === "SUCCESS"){
+                handleClickPurchase(salesListTotalData)
+            }
+        })
+    }
+    const handleClickPurchase = (salesListData : SalesListDataTotalType) => {
+        salesService.purchaseAll(salesListData).then(response=>{
+            if(response==="COIN_LACK"){
+                error("코인이 부족합니다")
+            } else if (response==="SUCCESS"){
+                success("답지 구매 완료")
+                cartService.deleteAll(memberId).then(()=>window.location.reload())
+            }
+        })
     }
     return (
         <>
+            {contextHolder}
             <CustomBannerBox>
                 <CustomBanner>
                     <Link to={"/"}><small>HOME</small></Link><br/><br/><br/>
@@ -45,6 +95,7 @@ function CartComponent() {
                     {
                         cartData.isLoading ? <></> :
                             cartList.map((item:any,i:number)=>{
+                                problemIdList.push(item[1].problemId)
                                 return (
                                     <tr key={i} style={{height: "50px"}}>
                                         <td style={{width: "200px", textAlign: "start"}}>{item[1].title}</td>
@@ -80,7 +131,7 @@ function CartComponent() {
                             </Cost>
                         </div>
                         <br/><br/>
-                        <PurchaseButton>
+                        <PurchaseButton onClick={handleCheckPurchase}>
                             구매하기
                         </PurchaseButton>
                     </div>

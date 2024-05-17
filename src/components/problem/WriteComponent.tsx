@@ -45,7 +45,11 @@ function WriteComponent() {
         setProblemParam({...problemParam});
     }
     useEffect(() => {
-
+        const loginCheck = memberRepository.getLoginCheck()
+        if(!loginCheck){
+            alert("로그인이 필요한 서비스입니다")
+            navigate(`../${category}/1`)
+        }
     }, []);
     const handleClick = ()=>{
         problemService.register(problemParam,quiz,answer).then((response)=>{
@@ -248,7 +252,7 @@ export const WriteBasicInput = styled.input`
     }
 `
 
-const WriteBasicSelect = styled.select`
+export const WriteBasicSelect = styled.select`
     width: 53%;
     height: 50px;
     min-width: 340px;

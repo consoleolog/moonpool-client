@@ -21,15 +21,10 @@ class CartService {
         const result = await jwtAxios.post(`${host}/register-check`, cartData)
         return result.data;
     }
-    static noLoginRegister = async (cartData : CartDataTypes) => {
-        let cartList = localStorage.getItem("cartList")
-        if (typeof cartList === "string"){
-            let cartArray = JSON.parse(cartList);
-            cartArray.push(cartData)
-            let result = new Set();
-            result.add(cartArray)
-            localStorage.setItem("cartList", JSON.stringify(result))
-        }
+    static deleteAll = async (memberId:string) => {
+        const result = await jwtAxios.delete(`${host}/delete/all?memberId=${memberId}`)
+        return result.data;
     }
+
 }
 export default CartService;
