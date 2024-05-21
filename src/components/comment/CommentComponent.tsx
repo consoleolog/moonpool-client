@@ -82,6 +82,12 @@ function CommentComponent({userId}: CommentComponentProps) {
             <PageNationBox>
                 {
                     result.isLoading ? <></> :
+                        result.data.prev !== 0 ?
+                            <PageBtn onClick={()=>navigate(`../detail/${problemId}?commentPage=${result.data.prev}`)}></PageBtn>
+                            :<></>
+                }
+                {
+                    result.isLoading ? <></> :
                         result.data.numList.map((item: any, i: number) => {
                             return (
                                 <PageBtn key={i} onClick={() => {
@@ -91,6 +97,12 @@ function CommentComponent({userId}: CommentComponentProps) {
                                 </PageBtn>
                             )
                         })
+                }
+                {
+                    result.isLoading ? <></> :
+                        result.data.next !== 0 ?
+                            <PageBtn onClick={()=>navigate(`../detail/${problemId}?commentPage=${result.data.next}`)}></PageBtn>
+                            :<></>
                 }
             </PageNationBox>
             <CommentInput value={commentData.content} name={"content"} onChange={handleChange}/>

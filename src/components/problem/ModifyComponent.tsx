@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Link, useNavigate, useParams} from "react-router-dom";
 import styled from "styled-components";
 import {BlackBg, CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn, Wrapper} from "../../Global.style";

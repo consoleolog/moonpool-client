@@ -33,6 +33,7 @@ function DetailComponent() {
     const [messageApi, contextHolder] = message.useMessage();
     const [answer, setAnswer] = useState<number>(0);
     const loginCheck = memberRepository.getLoginCheck()
+    const [salesCheck, setSalesCheck] = useState<boolean>(false)
     // alert 에러 생성 함수
     const error = (content:string) => {
         messageApi.open({
@@ -116,7 +117,8 @@ function DetailComponent() {
     const purchase = (salesData:SalesDataType) => {
         salesService.purchase(salesData).then(response=>{
             if (response === "SUCCESS"){
-                success("답지 구매 완료")
+                alert("답지 구매 완료")
+                navigate(`/sales/items/answer/${problemId}`)
             } else if (response === "ERROR"){
                 error("답지 구매 중 에러 발생!")
             }
@@ -134,7 +136,6 @@ function DetailComponent() {
                 } else {
                     error("문제 등록 중 오류가 발생했습니다")
                 }
-
             }).catch(err => {
                 error("에러 발생")
             })
@@ -155,8 +156,16 @@ function DetailComponent() {
                 setServerData(copy)
             })
         }
+        if(userId!==undefined){
+            if (typeof problemId === "string"){
+                salesService.checkSalesOne(userId, problemId).then((response)=>{
+                    if(response){
+                        setSalesCheck(response)
+                    }
+                })
+            }
+        }
     }, [problemId]);
-
     return (
         <>
             <CustomBannerBox>
@@ -201,25 +210,33 @@ function DetailComponent() {
                                 <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
                             </div>
                         </Aside> :
-                        <Aside>
-                            <div style={{width: "90%", margin: "0 auto"}}>
-                                <PurchaseBtn onClick={purchaseCheck}>
-                                    답지 구매하기
-                                </PurchaseBtn>
-                                <CartAddBtn onClick={registerCheck}>
-                                    장바구니 추가
-                                </CartAddBtn>
-                                <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
-                                <div><AnswerInput type={"number"} value={answer} onChange={(e:any)=>setAnswer(e.target.value)}
-                                    name={"answer"} placeholder={"정답을 맞춰보세요!!"}/></div>
-                                <div>
-                                    <AnswerBtn onClick={checkAnswer}>
-                                        정답 제출하기
-                                    </AnswerBtn>
+                        salesCheck ?
+                            <SmallAsideBox>
+                                <div style={{width: "90%", margin: "0 auto"}}>
+                                    <WatchAnswerBtn onClick={()=>navigate(`/sales/items/answer/${problemId}`)}>
+                                        답지 보기
+                                    </WatchAnswerBtn>
                                 </div>
+                            </SmallAsideBox>
+                            :<Aside>
+                                <div style={{width: "90%", margin: "0 auto"}}>
+                                    <PurchaseBtn onClick={purchaseCheck}>
+                                        답지 구매하기
+                                    </PurchaseBtn>
+                                    <CartAddBtn onClick={registerCheck}>
+                                        장바구니 추가
+                                    </CartAddBtn>
+                                    <h4 className={"font-xl mt-20"}>{serverData.price}C</h4>
+                                    <div><AnswerInput type={"number"} value={answer} onChange={(e:any)=>setAnswer(e.target.value)}
+                                                      name={"answer"} placeholder={"정답을 맞춰보세요!!"}/></div>
+                                    <div>
+                                        <AnswerBtn onClick={checkAnswer}>
+                                            정답 제출하기
+                                        </AnswerBtn>
+                                    </div>
 
-                            </div>
-                        </Aside>
+                                </div>
+                            </Aside>
                 }
             </AsideBox>
 
@@ -253,6 +270,14 @@ const AsideBox = styled.aside`
         float: none;
     }
 `
+const SmallAsideBox = styled.aside`
+    width: 95%;
+    height: 230px;
+    margin: 10px auto;
+    border: 1px solid rgb(230,230,230);
+    background-color: rgb(250,250,250);
+    text-align: center;
+`
 const Aside = styled.aside`
     width: 95%;
     height: 430px;
@@ -261,6 +286,21 @@ const Aside = styled.aside`
     background-color: rgb(250,250,250);
     text-align: center;
 
+`
+const WatchAnswerBtn = styled.button`
+    height: 70px;
+    border-radius: 5px;
+    margin: 70px 0 auto;
+    background-color: rgb(99, 191, 203);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 400;
+    border: none;
+    transition: all 0.3s;
+    cursor: pointer;
+    &:hover {
+        background-color: rgb(81, 183, 196);
+    }
 `
 const PurchaseBtn = styled.button`
     height: 70px;

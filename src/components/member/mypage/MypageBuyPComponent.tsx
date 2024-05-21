@@ -21,7 +21,7 @@ function MypageBuyPComponent() {
             setServerData(copy);
         })
     }, []);
-
+    console.log(serverData)
     return (
         <div style={{width:"90%",margin:"0 auto"}}>
         <SettingTapContentsBox>
@@ -53,13 +53,21 @@ function MypageBuyPComponent() {
             </GreyBg>
             <PageNationBox>
                 {
+                    serverData && serverData.prev !== 0 ?
+                        <PageBtn onClick={()=>navigate(`../buy/${serverData.prev}`)}>이전</PageBtn>
+                        :<></>
+                }
+                {
                     serverData && serverData.numList.map((item:number,i:number)=>{
                         return (
-                            <PageBtn key={i} onClick={()=>{
-
-                            }}>{item}</PageBtn>
+                            <PageBtn key={i} onClick={()=>navigate(`../buy/${item}`)}>{item}</PageBtn>
                         )
                     })
+                }
+                {
+                    serverData && serverData.next !== 0 ?
+                        <PageBtn onClick={()=>navigate(`../buy/${serverData.next}`)}>다음</PageBtn>
+                        :<></>
                 }
             </PageNationBox>
         </SettingTapContentsBox>

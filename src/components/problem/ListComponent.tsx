@@ -86,10 +86,10 @@ function ListComponent() {
             <PageNationBox>
                 {
                     !searchCheck ?
-                        serverData && serverData.next > 11 ?
+                        serverData && serverData.prev  !== 0 ?
                             <PageBtn onClick={()=>navigate(`../${serverData?.prev}/?searchText=${searchText}`)}>이전</PageBtn>
                             :<></>:
-                        serverData && serverData.next > 11 ?
+                        serverData && serverData.prev !== 0 ?
                             <PageBtn onClick={()=>navigate(`../${category}/${serverData?.prev}`)}>이전</PageBtn> :
                             <></>
                 }
@@ -111,11 +111,10 @@ function ListComponent() {
                     })
                 }
                 {
-                    // 이전
-                   !searchCheck ? serverData && serverData.start > 0  ?
-                           <PageBtn onClick={()=>navigate(`../${serverData?.next}//?searchText=${searchText}`)}>다음</PageBtn> :<></> :
-                       serverData && serverData.start > 0  ?
-                           <PageBtn onClick={()=>navigate(`../${category}/${serverData?.next}`)}>다음</PageBtn> :<></>
+                    !searchCheck ? serverData && serverData.next !== 0 ?
+                        <PageBtn onClick={()=>navigate(`../${serverData?.next}//?searchText=${searchText}`)}>다음</PageBtn> :<></> :
+                        serverData && serverData.next !== 0  ?
+                            <PageBtn onClick={()=>navigate(`../${category}/${serverData?.next}`)}>다음</PageBtn> :<></>
                 }
             </PageNationBox>
         </WhiteBg>

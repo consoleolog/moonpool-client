@@ -57,13 +57,21 @@ function MypageMadePComponent() {
             <PageNationBox>
 
                 {
+                    serverData && serverData.prev !== 0 ?
+                        <PageBtn onClick={()=>navigate(`../made/${serverData.prev}`)}>이전</PageBtn>
+                        :<></>
+                }
+                {
                     serverData && serverData.numList.map((item:number,i:number)=>{
                         return (
-                            <PageBtn key={i} onClick={()=>{
-                                navigate("../made/"+item)
-                            }}>{item}</PageBtn>
+                            <PageBtn key={i} onClick={()=>navigate(`../made/${item}`)}>{item}</PageBtn>
                         )
                     })
+                }
+                {
+                    serverData && serverData.next !== 0 ?
+                        <PageBtn onClick={()=>navigate(`../made/${serverData.next}`)}>다음</PageBtn>
+                        :<></>
                 }
             </PageNationBox>
         </SettingTapContentsBox>

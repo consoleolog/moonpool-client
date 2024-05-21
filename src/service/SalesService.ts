@@ -38,6 +38,13 @@ class SalesService {
         const result = await jwtAxios.post(`${host}/purchased-check`, salesListData)
         return result.data;
     }
-
+    static getSalesList = async (memberId : string)=>{
+        const result = await jwtAxios.get(`${host}/get-sales-list/${memberId}`)
+        return result.data;
+    }
+    static checkSalesOne = async (memberId : string, problemId : string) => {
+        const result = await jwtAxios.get(`${host}/check-sales-one/${memberId}?problemId=${problemId}`)
+        return result.data;
+    }
 }
 export default SalesService;

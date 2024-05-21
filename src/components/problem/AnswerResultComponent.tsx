@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {CustomBanner, CustomBannerAside, CustomBannerBox, CustomBannerBtn} from "../../Global.style";
-import {Link, useParams} from "react-router-dom";
+import {Link, useNavigate, useParams} from "react-router-dom";
 import styled from "styled-components";
 import problemService from "../../service/ProblemService";
-import {ProblemDataType, ProblemDetailType} from "../../types/ProblemTypes";
+import { ProblemDetailType} from "../../types/ProblemTypes";
 const initState = {
     problemId : "",
     title : "",
@@ -21,6 +21,7 @@ const initState = {
 function AnswerResultComponent() {
     const [serverData, setServerData] = useState<ProblemDetailType>(initState);
     const {problemId} = useParams()
+    const navigate = useNavigate();
     useEffect(() => {
         if (typeof problemId === "string") {
             problemService.getOne(problemId).then(response=>{
@@ -29,7 +30,6 @@ function AnswerResultComponent() {
             })
         }
     }, []);
-    console.log(serverData)
     return (
         <>
             <CustomBannerBox>
@@ -38,7 +38,7 @@ function AnswerResultComponent() {
                     <p style={{fontSize:"25px"}}>답지 이미지</p>
                 </CustomBanner>
                 <CustomBannerAside>
-                    <CustomBannerBtn>
+                    <CustomBannerBtn onClick={()=>navigate(`/problems/detail/${problemId}/?commentPage=1`)}>
                         돌아가기
                     </CustomBannerBtn>
                 </CustomBannerAside>
